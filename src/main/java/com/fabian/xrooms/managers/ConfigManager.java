@@ -1,0 +1,189 @@
+package com.fabian.xrooms.managers;
+
+import com.fabian.xrooms.XRooms;
+import lombok.Getter;
+import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import com.fabian.xrooms.utils.ConfigUpdater;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+@Getter
+public class ConfigManager {
+
+    private final XRooms plugin;
+    private FileConfiguration config;
+    private FileConfiguration messages;
+    
+    private String prefix;
+    private String entrySound;
+    private String killSound;
+    
+    private boolean useOwnInventory;
+    private int startCountdown;
+    private String barrierMaterial;
+    private boolean restoreOnQuit;
+    private int entryTitleCooldown;
+    private int endDelay;
+    private int autoResetInterval;
+    
+    private final Map<String, Integer> abilitiesLimits = new HashMap<>();
+    private final Map<String, String> messageCache = new HashMap<>();
+
+    public ConfigManager(XRooms plugin) {
+        this.plugin = plugin;
+        
+        File configFile = new File(plugin.getDataFolder(), "config.yml");
+        if (configFile.exists()) {
+            FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(configFile);
+            int currentVersion = currentConfig.getInt("config-version", 0);
+            
+            // Get internal version from resource
+            FileConfiguration internalConfig = YamlConfiguration.loadConfiguration(new java.io.InputStreamReader(plugin.getResource("config.yml")));
+            int internalVersion = internalConfig.getInt("config-version", 0);
+            
+            if (currentVersion < internalVersion) {
+                plugin.getLogger().info("Updating config.yml from version " + currentVersion + " to " + internalVersion);
+                
+                // 1. Create backup (Copy instead of Rename to keep the file accessible for ConfigUpdater)
+                File backupFile = new File(plugin.getDataFolder(), "config_old.yml");
+                try {
+                    com.google.common.io.Files.copy(configFile, backupFile);
+                } catch (java.io.IOException e) {
+                    plugin.getLogger().warning("Could not create backup of config.yml");
+                }
+                
+                // 2. The ConfigUpdater below will handle merging new keys and keeping old values.
+                // We don't need to saveResource(true) because that would wipe custom values.
+            }
+        } else {
+            plugin.saveDefaultConfig();
+        }
+        
+        try {
+            // This tool merges new keys from the JAR into the file on disk while preserving values.
+            ConfigUpdater.update(plugin, "config.yml", configFile);
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to auto-update config.yml");
+            e.printStackTrace();
+        }
+        
+        plugin.reloadConfig();
+        this.config = plugin.getConfig();
+        
+        // Ensure the config-version on disk is updated to the latest version
+        int internalVer = YamlConfiguration.loadConfiguration(new java.io.InputStreamReader(plugin.getResource("config.yml"))).getInt("config-version", 0);
+        if (this.config.getInt("config-version", 0) < internalVer) {
+            this.config.set("config-version", internalVer);
+            try {
+                this.config.save(configFile);
+            } catch (java.io.IOException ignored) {}
+        }
+
+        setupConfig();
+        setupMessages();
+    }
+
+    public void setupConfig() {
+        this.prefix = color(config.getString("prefix", "&8[&bX-Rooms&8] &r"));
+        this.entrySound = config.getString("entry-sound", "ENTITY_PLAYER_LEVELUP");
+        this.killSound = config.getString("kill-sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
+        
+        this.useOwnInventory = config.getBoolean("room-settings.use-own-inventory", false);
+        this.startCountdown = config.getInt("room-settings.start-countdown", 3);
+        this.barrierMaterial = config.getString("room-settings.barrier-material", "AIR");
+        this.restoreOnQuit = config.getBoolean("room-settings.restore-on-quit", true);
+        this.entryTitleCooldown = config.getInt("room-settings.entry-title-cooldown", -1);
+        this.endDelay = config.getInt("room-settings.end-delay", 3);
+        this.autoResetInterval = config.getInt("schematics.auto-reset-interval", 30);
+        
+        abilitiesLimits.clear();
+        if (config.contains("room-settings.abilities-level-limit")) {
+            org.bukkit.configuration.ConfigurationSection section = config.getConfigurationSection("room-settings.abilities-level-limit");
+            if (section != null) {
+                for (String key : section.getKeys(false)) {
+                    abilitiesLimits.put(key.toLowerCase(), section.getInt(key));
+                }
+            }
+        }
+    }
+
+    public void setupMessages() {
+        String lang = config.getString("language", "es");
+        File messagesFile = new File(plugin.getDataFolder(), "messages/" + lang + ".yml");
+        
+        if (!messagesFile.exists()) {
+            plugin.saveResource("messages/es.yml", false);
+            plugin.saveResource("messages/en.yml", false);
+            plugin.saveResource("messages/fr.yml", false);
+        } else {
+            // Update the current language file
+            try {
+                ConfigUpdater.update(plugin, "messages/" + lang + ".yml", messagesFile);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to auto-update messages/" + lang + ".yml");
+                e.printStackTrace();
+            }
+        }
+        
+        this.messages = YamlConfiguration.loadConfiguration(messagesFile);
+        messageCache.clear();
+    }
+
+    public String getMessage(String path) {
+        return color(prefix + messages.getString(path, "&cMissing message: " + path));
+    }
+
+    public String getMessageRaw(String path) {
+        return color(messages.getString(path, "&cMissing message: " + path));
+    }
+
+    public void sendMessage(org.bukkit.command.CommandSender sender, String path) {
+        sender.sendMessage(getMessage(path));
+    }
+
+    public void sendMessageRaw(org.bukkit.command.CommandSender sender, String text) {
+        sender.sendMessage(color(prefix + text));
+    }
+
+    public void reload() {
+        plugin.reloadConfig();
+        this.config = plugin.getConfig();
+        setupConfig();
+        setupMessages();
+    }
+
+    public String color(String text) {
+        if (text == null) return "";
+        
+        // Support for hex colors (&#RRGGBB) - Only 1.16+
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("&#([A-Fa-f0-9]{6})");
+        java.util.regex.Matcher matcher = pattern.matcher(text);
+        StringBuffer buffer = new StringBuffer();
+        
+        while (matcher.find()) {
+            String color = matcher.group(1);
+            try {
+                // net.md_5.bungee.api.ChatColor.of(String) is available in 1.16+
+                matcher.appendReplacement(buffer, net.md_5.bungee.api.ChatColor.of("#" + color).toString());
+            } catch (NoSuchMethodError | NoClassDefFoundError | Exception e) {
+                // Fallback for 1.8.8 - 1.15.2 (Strip hex and just use legacy)
+                matcher.appendReplacement(buffer, "");
+            }
+        }
+        matcher.appendTail(buffer);
+        
+        return ChatColor.translateAlternateColorCodes('&', buffer.toString());
+    }
+
+    public String setPlaceholders(org.bukkit.entity.Player player, String text) {
+        if (text == null) return "";
+        if (org.bukkit.Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            return me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, text);
+        }
+        return text;
+    }
+}

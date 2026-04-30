@@ -1,0 +1,94 @@
+#  ======================================================
+#                X-Rooms - Room Template
+#  ======================================================
+# This file serves as a reference for creating custom rooms.
+# You can create new rooms by copying this file or using /xrooms create.
+
+# Display name used in GUI and messages. Supports color codes.
+displayName: "&b&lDiamond Room"
+
+# Custom permission required to join this room.
+# Leave empty ("") to use the default permission: xrooms.player.<room>
+# Set 'require-permission: true' to restrict access.
+require-permission: false
+permission: "xrooms.room.diamond"
+
+# Player requirements.
+min-players: 2
+max-players: 10
+
+# Match duration in seconds.
+# After this time, the match ends and survivors are sent to spawn.
+# Use -1 for unlimited duration.
+pvp-duration: 300
+
+# [ HOLOGRAM CONFIGURATION ]
+hologram:
+  enabled: true
+  # Internal Placeholders: {name}, {players}, {max}, {time}
+  # Global Placeholders: Supports PlaceholderAPI if installed.
+  lines:
+    - "&b&lDIAMOND ROOM"
+    - "&7Players: &f{players}/{max}"
+    - "&eTime remaining: &f{time}"
+  # Coordinates for the hologram.
+  location:
+    world: world
+    x: 0.5
+    y: 65.0
+    z: 0.5
+    pitch: 0.0
+    yaw: 0.0
+
+# [ TELEPORTATION ]
+# Destination for the winner after the match ends.
+# If not set, the winner will stay in the room.
+winner-location:
+  world: world
+  x: 100.5
+  y: 70.0
+  z: 100.5
+  pitch: 0.0
+  yaw: 0.0
+
+# [ REGION DEFINITION ]
+# The cuboid area where the PvP takes place.
+# It is highly recommended to use '/xrooms redefine' in-game with WorldEdit.
+region:
+  world: "world"
+  minX: -10.0
+  minY: 60.0
+  minZ: -10.0
+  maxX: 10.0
+  maxY: 80.0
+  maxZ: 10.0
+
+# [ SOUNDS & VISUALS ]
+sounds:
+  # Sound played when a player enters the room region.
+  entry: "ENTITY_PLAYER_LEVELUP"
+  # Sound played when a player kills someone inside.
+  kill: "ENTITY_EXPERIENCE_ORB_PICKUP"
+
+visuals:
+  # Title and subtitle shown on screen when entering.
+  title: "&b&l{name}"
+  subtitle: "&fWelcome to the Diamond Room!"
+
+# [ ABILITIES & POTIONS ]
+# Permanent effects applied to players while inside the region.
+# Options: STRENGTH, SPEED, RESISTANCE, HASTE, REGENERATION, 
+#          FIRE_RESISTANCE, JUMP, SATURATION, ABSORPTION, FLY
+abilities:
+  STRENGTH: 1
+  SPEED: 2
+  RESISTANCE: 1
+  JUMP: 2
+  SATURATION: 1
+
+# [ DATA STORAGE ]
+# These lists are best managed using the in-game GUI (/xrooms edit).
+# rewards: List of items given to the winner.
+# equipment: Items given to players if 'use-own-inventory' is false.
+rewards: []
+equipment: []

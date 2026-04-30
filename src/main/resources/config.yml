@@ -1,0 +1,91 @@
+#  __   __      ____    ___    ___   __  __  ____ 
+#  \ \ / /     |  _ \  / _ \  / _ \ |  \/  |/ ___|
+#   \ V /_____ | |_) || | | || | | || |\/| |\___ \
+#    > <|_____||  _ < | |_| || |_| || |  | | ___) |
+#   /_/ \_\    |_| \_\ \___/  \___/ |_|  |_||____/ 
+#                                                  
+# ==============================================================================
+# X-Rooms | Developed by Fabian (X-Proyects)
+# Discord: http://discord.xproyects.qzz.io/
+# Supported versions: 1.8.8 - 1.21.x
+# ==============================================================================
+
+# [ SYSTEM SETTINGS ]
+# Internal configuration version. Do not change this value.
+config-version: 2
+
+# The prefix that will appear before most plugin messages.
+# Supports HEX colors (&#RRGGBB) for 1.16+ and traditional codes (&).
+prefix: "&8[&bX-Rooms&8]&r "
+
+# Plugin language (files located in messages/ folder).
+# Available: es (Spanish), en (English), fr (French).
+language: "en"
+
+# Send anonymous usage statistics to bStats.
+metrics: true
+
+# [ GLOBAL GAMEPLAY SETTINGS ]
+room-settings:
+  # Inventory Management:
+  # true  = Players use their own items.
+  # false = Inventory is saved, cleared, and replaced with the room's kit (Equipment).
+  use-own-inventory: false
+
+  # Wait time (in seconds) before the PvP actually starts after entering a room.
+  start-countdown: 3
+
+  # Protection barrier: Material used to block movement during countdowns.
+  # Use 'AIR' to only cancel movement events (invisible barrier).
+  # Recommended: RED_STAINED_GLASS, AIR, BARRIER.
+  barrier-material: "AIR"
+
+  # Combat Logging Protection:
+  # true  = Restore player inventory even if they disconnect during PvP.
+  # false = Delete backup inventory if they quit during battle (Punishment).
+  restore-on-quit: true
+
+  # Welcome Message Cooldown:
+  # Seconds to wait before showing the Title/Subtitle again to the same player in the same room.
+  # -1 or 0 = Always show whenever they enter.
+  entry-title-cooldown: -1
+
+  # Match End Delay:
+  # Seconds to wait before teleporting players out of the room and resetting the room after a match ends.
+  end-delay: 3
+
+  # Ability Level Limits:
+  # Sets a maximum allowed level for each potion effect in the GUIs.
+  # Use the internal names (lowercase).
+  abilities-level-limit:
+    strength: 5
+    speed: 5
+    resistance: 5
+    haste: 5
+    regeneration: 5
+    fire_resistance: 5
+    jump: 5
+    saturation: 5
+    absorption: 5
+    fly: 1
+
+
+# [ HOLOGRAM SETTINGS ]
+# These settings apply to rooms that use holograms.
+holograms:
+  # Which plugin to use for holograms. 
+  # AUTO will detect DecentHolograms or HolographicDisplays automatically.
+  provider: "AUTO"
+
+  # Default lines if a room doesn't have custom ones.
+  # Placeholders: {name}, {players}, {max}, {time}.
+  default-lines:
+    - "&b&l{name}"
+    - "&7Players: &f{players}/{max}"
+    
+# [ SCHEMATIC SETTINGS ]
+# These settings apply to rooms that have a schematic saved.
+schematics:
+  # How often (in minutes) to automatically reset all rooms that have a schematic saved.
+  # Set to -1 to disable timed resets (only reset at end of match).
+  auto-reset-interval: 30

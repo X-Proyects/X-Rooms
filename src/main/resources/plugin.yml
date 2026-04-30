@@ -1,0 +1,46 @@
+name: X-Rooms
+version: 1.1
+main: com.fabian.xrooms.XRooms
+api-version: 1.13
+author: Fabian
+folia-supported: true
+description: Advanced Room Management for BoxPVP.
+
+commands:
+  xrooms:
+    description: Main command for X-Rooms.
+    aliases: [xr, rooms, room]
+
+softdepend: [WorldEdit, FastAsyncWorldEdit, PlaceholderAPI, DecentHolograms, HolographicDisplays]
+
+permissions:
+  xrooms.admin.*:
+    description: Total permission to manage X-Rooms.
+    default: op
+    children:
+      xrooms.admin.create: true
+      xrooms.admin.delete: true
+      xrooms.admin.edit: true
+      xrooms.admin.gui: true
+      xrooms.admin.tp: true
+  xrooms.admin.create:
+    description: Allows creating new rooms.
+    default: op
+  xrooms.admin.delete:
+    description: Allows deleting existing rooms.
+    default: op
+  xrooms.admin.edit:
+    description: Allows editing room properties.
+    default: op
+  xrooms.admin.gui:
+    description: Allows opening the GUI control panel.
+    default: op
+  xrooms.admin.reload:
+    description: Allows reloading the plugin configuration.
+    default: op
+  xrooms.admin.tp:
+    description: "Allows teleporting to rooms"
+    default: op
+  xrooms.player.*:
+    description: Allows entering all rooms (for VIPs/Admins).
+    default: op
