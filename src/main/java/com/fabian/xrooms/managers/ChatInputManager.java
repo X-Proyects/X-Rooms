@@ -7,16 +7,16 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class ChatInputManager implements Listener {
 
     private final XRooms plugin;
-    private final Map<UUID, Consumer<String>> pendingInputs = new HashMap<>();
-    private final Map<UUID, Runnable> pendingCancels = new HashMap<>();
+    private final Map<UUID, Consumer<String>> pendingInputs = new ConcurrentHashMap<>();
+    private final Map<UUID, Runnable> pendingCancels = new ConcurrentHashMap<>();
 
     public ChatInputManager(XRooms plugin) {
         this.plugin = plugin;
@@ -49,13 +49,13 @@ public class ChatInputManager implements Listener {
             if (input.equalsIgnoreCase("cancel")) {
                 p.sendMessage(plugin.getConfigManager().getMessageRaw("chat-action-cancelled"));
                 if (onCancel != null) {
-                    plugin.getXScheduler().runTask(onCancel);
+                    plugin.getSchedulerUtil().runTask(onCancel);
                 }
                 return;
             }
 
             // Execute the callback on the main thread
-            plugin.getXScheduler().runTask(() -> callback.accept(input));
+            plugin.getSchedulerUtil().runTask(() -> callback.accept(input));
         }
     }
 }

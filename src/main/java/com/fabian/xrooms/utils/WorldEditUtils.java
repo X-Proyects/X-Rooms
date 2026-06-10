@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.function.Consumer;
 
 public class WorldEditUtils {
 
@@ -123,7 +124,11 @@ public class WorldEditUtils {
         
         return new RegionSelection(min, max, player.getWorld().getName());
     }
-    public static boolean saveSchematic(org.bukkit.plugin.Plugin plugin, com.fabian.xrooms.models.Room room, Player player) {
+    public static void saveSchematic(org.bukkit.plugin.Plugin plugin, com.fabian.xrooms.models.Room room, Player player) {
+        saveSchematic(plugin, room, player, null);
+    }
+
+    public static void saveSchematic(org.bukkit.plugin.Plugin plugin, com.fabian.xrooms.models.Room room, Player player, Consumer<Boolean> callback) {
         File schematicsFolder = new File(plugin.getDataFolder(), "schematics");
         if (!schematicsFolder.exists()) schematicsFolder.mkdirs();
         File file = new File(schematicsFolder, room.getName() + ".schem");
@@ -144,6 +149,10 @@ public class WorldEditUtils {
                     break;
                 }
             }
+            if (getSessionMethod == null) {
+                if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
+                return;
+            }
             Object session = getSessionMethod.invoke(sessionManager, localPlayer);
             Object world = bukkitAdapterClass.getMethod("adapt", org.bukkit.World.class).invoke(null, player.getWorld());
             Object region;
@@ -151,12 +160,16 @@ public class WorldEditUtils {
                 region = session.getClass().getMethod("getSelection", Class.forName("com.sk89q.worldedit.world.World")).invoke(session, world);
             } catch (java.lang.reflect.InvocationTargetException e) {
                 if (e.getCause() != null && e.getCause().getClass().getSimpleName().equals("IncompleteRegionException")) {
-                    return false;
+                    if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
+                    return;
                 }
                 throw e;
             }
 
-            if (region == null) return false;
+            if (region == null) {
+                if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
+                return;
+            }
 
             // Copy to Clipboard
             Class<?> blockArrayClipboardClass = Class.forName("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard");
@@ -171,36 +184,58 @@ public class WorldEditUtils {
                 Class.forName("com.sk89q.worldedit.math.BlockVector3")
             ).newInstance(world, region, clipboard, region.getClass().getMethod("getMinimumPoint").invoke(region));
 
-            Class<?> operationsClass = Class.forName("com.sk89q.worldedit.function.operation.Operations");
-            operationsClass.getMethod("complete", Class.forName("com.sk89q.worldedit.function.operation.Operation")).invoke(null, copyOperation);
+            // Run the blocking copy + file save asynchronously
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    Class<?> operationsClass = Class.forName("com.sk89q.worldedit.function.operation.Operations");
+                    operationsClass.getMethod("complete", Class.forName("com.sk89q.worldedit.function.operation.Operation")).invoke(null, copyOperation);
 
-            // Save to File
-            Class<?> builtInClipboardFormatClass = Class.forName("com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat");
-            Object format = builtInClipboardFormatClass.getField("SPONGE_SCHEMATIC").get(null);
-            
-            try (OutputStream os = new FileOutputStream(file)) {
-                Object writer = format.getClass().getMethod("getWriter", OutputStream.class).invoke(format, os);
-                writer.getClass().getMethod("write", Class.forName("com.sk89q.worldedit.extent.clipboard.Clipboard")).invoke(writer, clipboard);
-                writer.getClass().getMethod("close").invoke(writer);
-            }
+                    // Save to File
+                    Class<?> builtInClipboardFormatClass = Class.forName("com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat");
+                    Object format = builtInClipboardFormatClass.getField("SPONGE_SCHEMATIC").get(null);
+                    
+                    try (OutputStream os = new FileOutputStream(file)) {
+                        Object writer = format.getClass().getMethod("getWriter", OutputStream.class).invoke(format, os);
+                        writer.getClass().getMethod("write", Class.forName("com.sk89q.worldedit.extent.clipboard.Clipboard")).invoke(writer, clipboard);
+                        writer.getClass().getMethod("close").invoke(writer);
+                    }
 
-            return true;
+                    if (callback != null) {
+                        Bukkit.getScheduler().runTask(plugin, () -> callback.accept(true));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (callback != null) {
+                        Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
+                    }
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
         }
     }
 
-    public static boolean pasteSchematic(org.bukkit.plugin.Plugin plugin, com.fabian.xrooms.models.Room room) {
+    public static void pasteSchematic(org.bukkit.plugin.Plugin plugin, com.fabian.xrooms.models.Room room) {
+        pasteSchematic(plugin, room, null);
+    }
+
+    public static void pasteSchematic(org.bukkit.plugin.Plugin plugin, com.fabian.xrooms.models.Room room, Consumer<Boolean> callback) {
         File schematicsFolder = new File(plugin.getDataFolder(), "schematics");
         File file = new File(schematicsFolder, room.getName() + ".schem");
-        if (!file.exists()) return false;
+        if (!file.exists()) {
+            if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
+            return;
+        }
 
         try {
             Class<?> bukkitAdapterClass = Class.forName("com.sk89q.worldedit.bukkit.BukkitAdapter");
             Class<?> clipboardFormatsClass = Class.forName("com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats");
             Object format = clipboardFormatsClass.getMethod("findByFile", File.class).invoke(null, file);
-            if (format == null) return false;
+            if (format == null) {
+                if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
+                return;
+            }
 
             Object clipboard;
             try (InputStream is = new FileInputStream(file)) {
@@ -209,10 +244,16 @@ public class WorldEditUtils {
                 reader.getClass().getMethod("close").invoke(reader);
             }
 
-            if (clipboard == null) return false;
+            if (clipboard == null) {
+                if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
+                return;
+            }
 
             org.bukkit.World bukkitWorld = Bukkit.getWorld(room.getWorldName());
-            if (bukkitWorld == null) return false;
+            if (bukkitWorld == null) {
+                if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
+                return;
+            }
             Object world = bukkitAdapterClass.getMethod("adapt", org.bukkit.World.class).invoke(null, bukkitWorld);
 
             Class<?> worldEditClass = Class.forName("com.sk89q.worldedit.WorldEdit");
@@ -231,15 +272,27 @@ public class WorldEditUtils {
             pasteOperation.getClass().getMethod("to", blockVector3Class).invoke(pasteOperation, pastePos);
             pasteOperation.getClass().getMethod("ignoreAirBlocks", boolean.class).invoke(pasteOperation, false);
 
-            Class<?> operationsClass = Class.forName("com.sk89q.worldedit.function.operation.Operations");
-            operationsClass.getMethod("complete", Class.forName("com.sk89q.worldedit.function.operation.Operation")).invoke(null, pasteOperation);
-            
-            editSession.getClass().getMethod("close").invoke(editSession);
+            // Run the blocking paste operation asynchronously
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    Class<?> operationsClass = Class.forName("com.sk89q.worldedit.function.operation.Operations");
+                    operationsClass.getMethod("complete", Class.forName("com.sk89q.worldedit.function.operation.Operation")).invoke(null, pasteOperation);
+                    
+                    editSession.getClass().getMethod("close").invoke(editSession);
 
-            return true;
+                    if (callback != null) {
+                        Bukkit.getScheduler().runTask(plugin, () -> callback.accept(true));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (callback != null) {
+                        Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
+                    }
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
         }
     }
 }

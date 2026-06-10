@@ -4,7 +4,7 @@ import com.fabian.xrooms.XRooms;
 import org.bukkit.Bukkit;
 import java.lang.reflect.Method;
 
-public class XScheduler {
+public class SchedulerUtil {
 
     private final XRooms plugin;
     private static boolean isFolia = false;
@@ -16,7 +16,7 @@ public class XScheduler {
         } catch (ClassNotFoundException ignored) {}
     }
 
-    public XScheduler(XRooms plugin) {
+    public SchedulerUtil(XRooms plugin) {
         this.plugin = plugin;
     }
 

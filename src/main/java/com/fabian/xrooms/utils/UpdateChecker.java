@@ -30,7 +30,7 @@ public class UpdateChecker {
     }
 
     public void checkForUpdates(CommandSender sender) {
-        plugin.getXScheduler().runAsync(() -> {
+        plugin.getSchedulerUtil().runAsync(() -> {
             try {
                 String currentVersion = plugin.getDescription().getVersion();
                 

@@ -2,7 +2,7 @@ name: X-Rooms
 version: 1.1
 main: com.fabian.xrooms.XRooms
 api-version: 1.13
-author: Fabian
+authors: [Fabian]
 folia-supported: true
 description: Advanced Room Management for BoxPVP.
 

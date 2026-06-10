@@ -2,12 +2,13 @@ package com.fabian.xrooms;
 
 import com.fabian.xrooms.managers.ConfigManager;
 import com.fabian.xrooms.managers.CommandManager;
+import com.fabian.xrooms.managers.DependencyManager;
 import com.fabian.xrooms.managers.PermissionManager;
 import com.fabian.xrooms.managers.RoomManager;
 import com.fabian.xrooms.managers.HologramManager;
 import com.fabian.xrooms.managers.ChatInputManager;
 import com.fabian.xrooms.managers.InventoryManager;
-import com.fabian.xrooms.utils.XScheduler;
+import com.fabian.xrooms.utils.SchedulerUtil;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,15 +28,19 @@ public class XRooms extends JavaPlugin {
     private HologramManager hologramManager;
     private ChatInputManager chatInputManager;
     private InventoryManager inventoryManager;
-    private XScheduler xScheduler;
+    private SchedulerUtil xScheduler;
 
     private final String CONSOLE_PREFIX = "&8[&bX-Rooms&8]&r ";
 
     @Override
     public void onEnable() {
         instance = this;
+
+        // Load libraries before anything else
+        new DependencyManager(this).loadDependencies();
+
         this.configManager = new ConfigManager(this);
-        this.xScheduler = new XScheduler(this);
+        this.xScheduler = new SchedulerUtil(this);
         this.chatInputManager = new ChatInputManager(this);
         
         org.bukkit.Bukkit.getConsoleSender().sendMessage(configManager.color(CONSOLE_PREFIX + "&aSuccessfully enabled!"));

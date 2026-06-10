@@ -6,10 +6,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
 public class RoomManager {
 
@@ -115,12 +117,8 @@ public class RoomManager {
             room.setEntryTitle(config.getString("visuals.title", "&b&l{name}"));
             room.setEntrySubtitle(config.getString("visuals.subtitle", "&fWelcome to the room!"));
             
-            @SuppressWarnings("unchecked")
-            List<ItemStack> rewards = (List<ItemStack>) config.getList("rewards");
-            room.setRewards(rewards);
-            @SuppressWarnings("unchecked")
-            List<ItemStack> equipment = (List<ItemStack>) config.getList("equipment");
-            room.setEquipment(equipment);
+            room.setRewards(deserializeItemStackList(config, "rewards"));
+            room.setEquipment(deserializeItemStackList(config, "equipment"));
             
             if (config.contains("abilities")) {
                 for (String key : config.getConfigurationSection("abilities").getKeys(false)) {
@@ -195,5 +193,26 @@ public class RoomManager {
 
     public void saveAll() {
         rooms.values().forEach(this::saveRoom);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<ItemStack> deserializeItemStackList(org.bukkit.configuration.ConfigurationSection config, String path) {
+        List<ItemStack> result = new ArrayList<>();
+        if (!config.contains(path)) return result;
+        List<?> raw = config.getList(path);
+        if (raw == null) return result;
+        for (Object entry : raw) {
+            if (entry instanceof ItemStack) {
+                result.add((ItemStack) entry);
+            } else if (entry instanceof Map) {
+                try {
+                    Object deserialized = ConfigurationSerialization.deserializeObject((Map<String, Object>) entry);
+                    if (deserialized instanceof ItemStack) {
+                        result.add((ItemStack) deserialized);
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+        return result;
     }
 }

@@ -294,7 +294,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             double cy = room.getMinY() + 1.0;
             double cz = (room.getMinZ() + room.getMaxZ()) / 2.0;
             Location loc = new Location(org.bukkit.Bukkit.getWorld(room.getWorldName()), cx, cy, cz);
-            plugin.getXScheduler().teleport(player, loc);
+            plugin.getSchedulerUtil().teleport(player, loc);
             player.sendMessage(plugin.getConfigManager().getMessage("teleported").replace("{name}", room.getDisplayName()));
             return true;
         }
@@ -315,14 +315,15 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             }
             
             player.sendMessage(plugin.getConfigManager().getMessage("saving-schematic"));
-            boolean success = WorldEditUtils.saveSchematic(plugin, room, player);
-            if (success) {
-                room.setSchematicEnabled(true);
-                plugin.getRoomManager().saveRoom(room);
-                player.sendMessage(plugin.getConfigManager().getMessage("schematic-saved"));
-            } else {
-                player.sendMessage(plugin.getConfigManager().getMessage("schematic-error"));
-            }
+            WorldEditUtils.saveSchematic(plugin, room, player, success -> {
+                if (success) {
+                    room.setSchematicEnabled(true);
+                    plugin.getRoomManager().saveRoom(room);
+                    player.sendMessage(plugin.getConfigManager().getMessage("schematic-saved"));
+                } else {
+                    player.sendMessage(plugin.getConfigManager().getMessage("schematic-error"));
+                }
+            });
             return true;
         }
 
