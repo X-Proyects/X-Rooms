@@ -12,15 +12,21 @@
 
 # [ SYSTEM SETTINGS ]
 # Internal configuration version. Do not change this value.
-config-version: 2
+code: 2
 
 # The prefix that will appear before most plugin messages.
 # Supports HEX colors (&#RRGGBB) for 1.16+ and traditional codes (&).
 prefix: "&8[&bX-Rooms&8]&r "
 
 # Plugin language (files located in messages/ folder).
-# Available: es (Spanish), en (English), fr (French).
+# Available: en (English), es (Spanish), ja (Japanese), pt (Portuguese), ru (Russian), custom
 language: "en"
+
+# Check for plugin updates on startup?
+check-updates: true
+
+# Enable detailed debug logging in the console?
+debug: false
 
 # Send anonymous usage statistics to bStats.
 metrics: true

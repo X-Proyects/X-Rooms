@@ -39,11 +39,11 @@ public class ConfigManager {
         File configFile = new File(plugin.getDataFolder(), "config.yml");
         if (configFile.exists()) {
             FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(configFile);
-            int currentVersion = currentConfig.getInt("config-version", 0);
+            int currentVersion = currentConfig.getInt("code", 0);
             
             // Get internal version from resource
             FileConfiguration internalConfig = YamlConfiguration.loadConfiguration(new java.io.InputStreamReader(plugin.getResource("config.yml")));
-            int internalVersion = internalConfig.getInt("config-version", 0);
+            int internalVersion = internalConfig.getInt("code", 0);
             
             if (currentVersion < internalVersion) {
                 plugin.getLogger().info("Updating config.yml from version " + currentVersion + " to " + internalVersion);
@@ -74,10 +74,10 @@ public class ConfigManager {
         plugin.reloadConfig();
         this.config = plugin.getConfig();
         
-        // Ensure the config-version on disk is updated to the latest version
-        int internalVer = YamlConfiguration.loadConfiguration(new java.io.InputStreamReader(plugin.getResource("config.yml"))).getInt("config-version", 0);
-        if (this.config.getInt("config-version", 0) < internalVer) {
-            this.config.set("config-version", internalVer);
+        // Ensure the code on disk is updated to the latest version
+        int internalVer = YamlConfiguration.loadConfiguration(new java.io.InputStreamReader(plugin.getResource("config.yml"))).getInt("code", 0);
+        if (this.config.getInt("code", 0) < internalVer) {
+            this.config.set("code", internalVer);
             try {
                 this.config.save(configFile);
             } catch (java.io.IOException ignored) {}
