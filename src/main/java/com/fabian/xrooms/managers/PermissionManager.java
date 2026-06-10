@@ -1,6 +1,7 @@
 package com.fabian.xrooms.managers;
 
 import com.fabian.xrooms.XRooms;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.entity.Player;
 
 public class PermissionManager {
@@ -35,13 +36,17 @@ public class PermissionManager {
     public boolean canEnter(Player player, com.fabian.xrooms.models.Room room) {
         if (!room.isRequirePermission()) return true;
         if (hasAdmin(player)) return true;
-        
+
         // Check custom permission if set
         if (room.getPermission() != null && !room.getPermission().isEmpty()) {
-            if (player.hasPermission(room.getPermission())) return true;
+            boolean has = player.hasPermission(room.getPermission());
+            DebugLogger.debug("PermissionManager", "canEnter: player=" + player.getName() + " room=" + room.getName() + " customPerm=" + has);
+            if (has) return true;
         }
-        
+
         // Default permission
-        return player.hasPermission("xrooms.player." + room.getName().toLowerCase());
+        boolean has = player.hasPermission("xrooms.player." + room.getName().toLowerCase());
+        DebugLogger.debug("PermissionManager", "canEnter: player=" + player.getName() + " room=" + room.getName() + " defaultPerm=" + has);
+        return has;
     }
 }

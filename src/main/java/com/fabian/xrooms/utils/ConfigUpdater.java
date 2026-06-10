@@ -15,6 +15,7 @@ public class ConfigUpdater {
 
     public static void update(XRooms plugin, String resourcePath, File diskFile) {
         if (!diskFile.exists()) return;
+        DebugLogger.debug("ConfigUpdater", "Updating file: " + diskFile.getName());
 
         try {
             YamlConfiguration resConfig = null;
@@ -52,6 +53,7 @@ public class ConfigUpdater {
             } else {
                 updateHierarchicalFile(plugin, diskFile, diskConfig, resConfig);
             }
+            DebugLogger.debug("ConfigUpdater", "Update completed for " + diskFile.getName() + " (" + (isFlat ? "flat" : "hierarchical") + ")");
 
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to update " + diskFile.getName() + ": " + e.getMessage());

@@ -3,6 +3,7 @@ package com.fabian.xrooms.managers;
 import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.guis.RoomsMenu;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import com.fabian.xrooms.utils.WorldEditUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -133,6 +134,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        DebugLogger.debug("CommandManager", "Command executed by " + sender.getName() + ": /xrooms " + String.join(" ", args));
         if (args.length == 0) {
             if (sender instanceof Player) {
                 sendHelp((Player) sender);
@@ -150,6 +152,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
                 sender.sendMessage(plugin.getConfigManager().getMessage("no-permission"));
                 return true;
             }
+            DebugLogger.debug("CommandManager", "Reload command executed");
             plugin.getConfigManager().reload();
             plugin.getRoomManager().loadAll();
             plugin.startSchematicTask();
@@ -214,6 +217,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             room.setMaxZ(Math.max(sel.min.getZ(), sel.max.getZ()));
 
             plugin.getRoomManager().createRoom(room);
+            DebugLogger.debug("CommandManager", "Room created: " + name);
             player.sendMessage(plugin.getConfigManager().getMessage("room-created").replace("{name}", name));
             return true;
         }

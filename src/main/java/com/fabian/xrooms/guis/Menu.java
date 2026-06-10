@@ -1,6 +1,7 @@
 package com.fabian.xrooms.guis;
 
 import com.fabian.xrooms.XRooms;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -29,6 +30,7 @@ public abstract class Menu implements InventoryHolder {
     public void handleClose(org.bukkit.event.inventory.InventoryCloseEvent e) {}
 
     public void open(Player player) {
+        DebugLogger.debug("Menu", "Opening menu: " + this.getClass().getSimpleName() + " for " + player.getName());
         inventory = Bukkit.createInventory(this, getSlots(), getMenuName());
         this.setMenuItems();
         player.openInventory(inventory);

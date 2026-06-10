@@ -1,6 +1,7 @@
 package com.fabian.xrooms.managers;
 
 import com.fabian.xrooms.XRooms;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -25,6 +26,7 @@ public class InventoryManager {
     }
 
     public void saveAndClearInventory(Player p) {
+        DebugLogger.debug("InventoryManager", "Saving and clearing inventory for " + p.getName());
         File file = new File(playersFolder, p.getUniqueId().toString() + ".yml");
         FileConfiguration config = new YamlConfiguration();
 
@@ -49,6 +51,7 @@ public class InventoryManager {
     public void restoreInventory(Player p) {
         File file = new File(playersFolder, p.getUniqueId().toString() + ".yml");
         if (!file.exists()) return;
+        DebugLogger.debug("InventoryManager", "Restoring inventory for " + p.getName());
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 

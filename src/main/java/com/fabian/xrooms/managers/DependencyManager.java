@@ -1,6 +1,7 @@
 package com.fabian.xrooms.managers;
 
 import com.fabian.xrooms.XRooms;
+import com.fabian.xrooms.utils.DebugLogger;
 import net.byteflux.libby.BukkitLibraryManager;
 import net.byteflux.libby.Library;
 
@@ -32,10 +33,13 @@ public class DependencyManager {
     public void loadDependencies() {
         try {
             plugin.getLogger().info("Loading runtime dependencies via X-API...");
+            DebugLogger.debug("DependencyManager", "Loading runtime dependencies...");
             loadAdventureDependencies();
             loadXSeriesDependency();
             plugin.getLogger().info("All dependencies loaded successfully!");
+            DebugLogger.debug("DependencyManager", "All dependencies loaded successfully");
         } catch (Exception e) {
+            DebugLogger.debug("DependencyManager", "Failed to load dependencies", e);
             plugin.getLogger().severe("Failed to load runtime dependencies! " + e.getMessage());
         }
     }

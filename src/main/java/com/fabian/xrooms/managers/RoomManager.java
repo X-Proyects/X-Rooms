@@ -2,6 +2,7 @@ package com.fabian.xrooms.managers;
 
 import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
@@ -28,11 +29,13 @@ public class RoomManager {
     }
 
     public void createRoom(Room room) {
+        DebugLogger.debug("RoomManager", "Creating room: " + room.getName());
         rooms.put(room.getName().toLowerCase(), room);
         saveRoom(room);
     }
 
     public void deleteRoom(String name) {
+        DebugLogger.debug("RoomManager", "Deleting room: " + name);
         rooms.remove(name.toLowerCase());
         File file = new File(roomsFolder, name.toLowerCase() + ".yml");
         if (file.exists()) file.delete();
@@ -65,6 +68,7 @@ public class RoomManager {
         rooms.clear();
         File[] files = roomsFolder.listFiles((dir, name) -> name.endsWith(".yml"));
         if (files == null) return;
+        DebugLogger.debug("RoomManager", "Found " + files.length + " room file(s) to load");
 
         for (File file : files) {
             YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -128,6 +132,7 @@ public class RoomManager {
             
             rooms.put(name.toLowerCase(), room);
         }
+        DebugLogger.debug("RoomManager", "Loaded " + rooms.size() + " room(s) total");
     }
 
     public void saveRoom(Room room) {
@@ -187,11 +192,13 @@ public class RoomManager {
         try {
             config.save(file);
         } catch (Exception e) {
+            DebugLogger.debug("RoomManager", "Failed to save room: " + room.getName(), e);
             e.printStackTrace();
         }
     }
 
     public void saveAll() {
+        DebugLogger.debug("RoomManager", "Saving all " + rooms.size() + " room(s)");
         rooms.values().forEach(this::saveRoom);
     }
 

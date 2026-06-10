@@ -2,6 +2,7 @@ package com.fabian.xrooms.guis;
 
 import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -43,6 +44,7 @@ public class RoomsMenu extends Menu {
 
     @Override
     public void setMenuItems() {
+        DebugLogger.debug("RoomsMenu", "Opening rooms menu with " + plugin.getRoomManager().getAllRooms().size() + " room(s)");
         fillBorders(XMaterial.GRAY_STAINED_GLASS_PANE.parseMaterial());
 
         Collection<Room> rooms = plugin.getRoomManager().getAllRooms();

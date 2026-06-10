@@ -33,6 +33,7 @@ public class ColorUtils {
         } catch (Exception e) {
             paperAdventureAvailable = false;
         }
+        DebugLogger.debug("ColorUtils", "Initialized (PAPI=" + papiAvailable + " PaperAdventure=" + paperAdventureAvailable + ")");
     }
 
     public static String translateColors(String text) {

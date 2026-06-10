@@ -2,6 +2,7 @@ package com.fabian.xrooms.guis;
 
 import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -40,6 +41,7 @@ public class EquipmentViewMenu extends Menu {
 
     @Override
     public void setMenuItems() {
+        DebugLogger.debug("EquipmentViewMenu", "Opening equipment view for room " + room.getName());
         // Decoration: Black glass at the bottom only as requested
         for (int i = 45; i < 54; i++) {
             inventory.setItem(i, createItem(XMaterial.BLACK_STAINED_GLASS_PANE.parseMaterial(), " ", null));

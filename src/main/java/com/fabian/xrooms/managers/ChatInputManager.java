@@ -1,6 +1,7 @@
 package com.fabian.xrooms.managers;
 
 import com.fabian.xrooms.XRooms;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,6 +29,7 @@ public class ChatInputManager implements Listener {
     }
 
     public void requestInput(Player player, String message, Consumer<String> callback, Runnable onCancel) {
+        DebugLogger.debug("ChatInputManager", "Requesting input from " + player.getName());
         player.closeInventory();
         player.sendMessage(plugin.getConfigManager().color(message));
         player.sendMessage(plugin.getConfigManager().getMessageRaw("chat-cancel-info"));
@@ -47,6 +49,7 @@ public class ChatInputManager implements Listener {
             Runnable onCancel = pendingCancels.remove(p.getUniqueId());
 
             if (input.equalsIgnoreCase("cancel")) {
+                DebugLogger.debug("ChatInputManager", "Input cancelled by " + p.getName());
                 p.sendMessage(plugin.getConfigManager().getMessageRaw("chat-action-cancelled"));
                 if (onCancel != null) {
                     plugin.getSchedulerUtil().runTask(onCancel);
@@ -55,6 +58,7 @@ public class ChatInputManager implements Listener {
             }
 
             // Execute the callback on the main thread
+            DebugLogger.debug("ChatInputManager", "Processing input from " + p.getName() + ": " + input);
             plugin.getSchedulerUtil().runTask(() -> callback.accept(input));
         }
     }

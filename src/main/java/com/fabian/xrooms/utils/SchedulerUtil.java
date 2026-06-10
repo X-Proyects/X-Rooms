@@ -13,7 +13,10 @@ public class SchedulerUtil {
         try {
             Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
             isFolia = true;
-        } catch (ClassNotFoundException ignored) {}
+            DebugLogger.debug("SchedulerUtil", "Folia detected - using region schedulers");
+        } catch (ClassNotFoundException ignored) {
+            DebugLogger.debug("SchedulerUtil", "Using standard Bukkit scheduler");
+        }
     }
 
     public SchedulerUtil(XRooms plugin) {

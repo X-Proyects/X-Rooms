@@ -5,6 +5,7 @@ import com.cryptomorin.xseries.messages.Titles;
 import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.models.RoomState;
+import com.fabian.xrooms.utils.DebugLogger;
 import com.fabian.xrooms.utils.WorldEditUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -45,6 +46,7 @@ public class RoomListener implements Listener {
                     if (left <= 0) {
                         // Start PVP
                         room.setState(RoomState.ACTIVE);
+                        DebugLogger.debug("RoomListener", "Room " + room.getName() + " state -> ACTIVE");
                         startTimers.remove(room);
                         roomTimers.put(room, room.getPvpDuration());
                         
@@ -113,6 +115,7 @@ public class RoomListener implements Listener {
 
         if (room != null && previous == null) {
             // Trying to enter
+            DebugLogger.debug("RoomListener", p.getName() + " entering room " + room.getName() + " (state=" + room.getState() + ")");
             if (room.getState() != RoomState.WAITING) {
                 p.sendMessage(plugin.getConfigManager().getMessage("pvp-already-started"));
                 e.setCancelled(true);
@@ -131,6 +134,7 @@ public class RoomListener implements Listener {
             enterRoomRegion(p, room);
         } else if (room == null && previous != null) {
             // Trying to leave
+            DebugLogger.debug("RoomListener", p.getName() + " leaving room " + previous.getName() + " (state=" + previous.getState() + ")");
             if (previous.getState() != RoomState.WAITING) {
                 p.sendMessage(plugin.getConfigManager().getMessage("cannot-escape"));
                 e.setCancelled(true);
@@ -151,7 +155,7 @@ public class RoomListener implements Listener {
     private void enterRoomRegion(Player p, Room room) {
         currentRooms.put(p.getUniqueId(), room);
         room.getAlivePlayers().add(p.getUniqueId());
-        
+        DebugLogger.debug("RoomListener", p.getName() + " entered room " + room.getName() + " (players=" + room.getAlivePlayers().size() + "/" + room.getMaxPlayers() + ")");
         // Title cooldown check
         int cooldown = plugin.getConfigManager().getEntryTitleCooldown();
         boolean showTitle = true;
@@ -183,7 +187,7 @@ public class RoomListener implements Listener {
     private void leaveRoomRegion(Player p, Room room) {
         currentRooms.remove(p.getUniqueId());
         room.getAlivePlayers().remove(p.getUniqueId());
-        
+        DebugLogger.debug("RoomListener", p.getName() + " left room " + room.getName() + " (players=" + room.getAlivePlayers().size() + ")");
         removePotion(p, "INCREASE_DAMAGE", "STRENGTH");
         removePotion(p, "SPEED", "SPEED");
         removePotion(p, "DAMAGE_RESISTANCE", "RESISTANCE");
@@ -230,6 +234,7 @@ public class RoomListener implements Listener {
 
     private void endRoom(Room room) {
         room.setState(RoomState.ENDING);
+        DebugLogger.debug("RoomListener", "Room " + room.getName() + " state -> ENDING (players alive=" + room.getAlivePlayers().size() + ")");
         roomTimers.remove(room);
         startTimers.remove(room);
 
@@ -250,6 +255,7 @@ public class RoomListener implements Listener {
                 WorldEditUtils.pasteSchematic(plugin, room);
             }
             room.setState(RoomState.WAITING);
+            DebugLogger.debug("RoomListener", "Room " + room.getName() + " state -> WAITING");
             room.getAlivePlayers().clear();
             
             for (UUID id : clone) {
@@ -280,6 +286,7 @@ public class RoomListener implements Listener {
         } else if (room.getState() == RoomState.STARTING && room.getAlivePlayers().size() < room.getMinPlayers()) {
             // If someone disconnected during starting countdown and we dipped below min-players
             room.setState(RoomState.WAITING);
+            DebugLogger.debug("RoomListener", "Room " + room.getName() + " state -> WAITING (below min players during start)");
             startTimers.remove(room);
             List<UUID> clone = new java.util.ArrayList<>(room.getAlivePlayers());
             for (UUID id : clone) {
@@ -296,6 +303,7 @@ public class RoomListener implements Listener {
         Player p = e.getPlayer();
         Room room = currentRooms.get(p.getUniqueId());
         if (room != null) {
+            DebugLogger.debug("RoomListener", p.getName() + " quit while in room " + room.getName() + " (state=" + room.getState() + ")");
             room.getAlivePlayers().remove(p.getUniqueId());
             if (room.getState() != RoomState.WAITING) {
                 // Combat log

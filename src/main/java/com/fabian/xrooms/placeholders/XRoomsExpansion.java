@@ -2,6 +2,7 @@ package com.fabian.xrooms.placeholders;
 
 import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -36,13 +37,16 @@ public class XRoomsExpansion extends PlaceholderExpansion {
 
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
+        DebugLogger.debug("XRoomsExpansion", "Placeholder request: %xroom_" + params + (player != null ? " (player=" + player.getName() + ")" : ""));
         // %xroom_maxplayers_<room>%
         // %xroom_minplayers_<room>%
         
         if (params.startsWith("maxplayers_")) {
             String roomName = params.substring(11);
             Room room = plugin.getRoomManager().getRoom(roomName);
-            return room != null ? String.valueOf(room.getMaxPlayers()) : "0";
+            String result = room != null ? String.valueOf(room.getMaxPlayers()) : "0";
+            DebugLogger.debug("XRoomsExpansion", "  -> maxplayers_" + roomName + " = " + result);
+            return result;
         }
 
         if (params.startsWith("minplayers_")) {

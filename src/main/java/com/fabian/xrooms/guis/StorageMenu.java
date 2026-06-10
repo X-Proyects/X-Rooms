@@ -2,6 +2,7 @@ package com.fabian.xrooms.guis;
 
 import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
@@ -48,6 +49,7 @@ public class StorageMenu extends Menu {
 
     @Override
     public void setMenuItems() {
+        DebugLogger.debug("StorageMenu", "Opening storage menu (type=" + type + ") for room " + room.getName());
         // Bottom decoration
         for (int i = 46; i < 53; i++) {
             inventory.setItem(i, createItem(XMaterial.BLACK_STAINED_GLASS_PANE.parseMaterial(), " ", null));

@@ -2,6 +2,7 @@ package com.fabian.xrooms.managers;
 
 import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
@@ -18,6 +19,7 @@ public class HologramManager {
         this.plugin = plugin;
         this.dhEnabled = Bukkit.getPluginManager().isPluginEnabled("DecentHolograms");
         this.hdEnabled = Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays");
+        DebugLogger.debug("HologramManager", "Provider detection: DH=" + dhEnabled + " HD=" + hdEnabled);
 
         if (!dhEnabled && !hdEnabled) {
             plugin.getLogger().warning("No compatible hologram plugin found (DecentHolograms or HolographicDisplays). Holograms will be disabled.");
@@ -31,6 +33,7 @@ public class HologramManager {
     }
 
     public void updateHolograms() {
+        DebugLogger.debug("HologramManager", "Updating holograms for " + plugin.getRoomManager().getAllRooms().size() + " room(s)");
         for (Room room : plugin.getRoomManager().getAllRooms()) {
             if (!room.isHologramEnabled()) {
                 removeHologram(room.getName());

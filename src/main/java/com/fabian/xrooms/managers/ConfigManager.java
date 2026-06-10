@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import com.fabian.xrooms.utils.ColorUtils;
 import com.fabian.xrooms.utils.ConfigUpdater;
+import com.fabian.xrooms.utils.DebugLogger;
 
 import java.io.File;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ public class ConfigManager {
         this.plugin = plugin;
         
         File configFile = new File(plugin.getDataFolder(), "config.yml");
+        DebugLogger.debug("ConfigManager", "Loading config.yml");
         if (configFile.exists()) {
             FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(configFile);
             int currentVersion = currentConfig.getInt("code", 0);
@@ -46,6 +48,7 @@ public class ConfigManager {
             int internalVersion = internalConfig.getInt("code", 0);
             
             if (currentVersion < internalVersion) {
+                DebugLogger.debug("ConfigManager", "Config outdated: v" + currentVersion + " -> v" + internalVersion);
                 plugin.getLogger().info("Updating config.yml from version " + currentVersion + " to " + internalVersion);
                 
                 // 1. Create backup (Copy instead of Rename to keep the file accessible for ConfigUpdater)
@@ -66,7 +69,9 @@ public class ConfigManager {
         try {
             // This tool merges new keys from the JAR into the file on disk while preserving values.
             ConfigUpdater.update(plugin, "config.yml", configFile);
+            DebugLogger.debug("ConfigManager", "ConfigUpdater merged config.yml");
         } catch (Exception e) {
+            DebugLogger.debug("ConfigManager", "Failed to auto-update config.yml", e);
             plugin.getLogger().warning("Failed to auto-update config.yml");
             e.printStackTrace();
         }
@@ -85,6 +90,7 @@ public class ConfigManager {
 
         setupConfig();
         setupMessages();
+        DebugLogger.debug("ConfigManager", "ConfigManager fully initialized (language=" + config.getString("language", "es") + ")");
     }
 
     public void setupConfig() {
@@ -150,10 +156,12 @@ public class ConfigManager {
     }
 
     public void reload() {
+        DebugLogger.debug("ConfigManager", "Reloading configuration...");
         plugin.reloadConfig();
         this.config = plugin.getConfig();
         setupConfig();
         setupMessages();
+        DebugLogger.debug("ConfigManager", "Configuration reloaded");
     }
 
     public String color(String text) {

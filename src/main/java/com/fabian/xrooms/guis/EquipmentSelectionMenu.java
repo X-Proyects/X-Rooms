@@ -2,6 +2,7 @@ package com.fabian.xrooms.guis;
 
 import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -44,6 +45,7 @@ public class EquipmentSelectionMenu extends Menu {
 
     @Override
     public void setMenuItems() {
+        DebugLogger.debug("EquipmentSelectionMenu", "Opening equipment selection for room " + room.getName());
         fillBorders(XMaterial.BLACK_STAINED_GLASS_PANE.parseMaterial());
 
         inventory.setItem(11, createItem(XMaterial.BOOK.parseMaterial(), 

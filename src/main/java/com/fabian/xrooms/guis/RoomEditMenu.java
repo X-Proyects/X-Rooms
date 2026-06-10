@@ -2,6 +2,7 @@ package com.fabian.xrooms.guis;
 
 import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -28,6 +29,7 @@ public class RoomEditMenu extends Menu {
     @Override
     public void handleMenu(InventoryClickEvent e) {
         Player p = (Player) e.getWhoClicked();
+        DebugLogger.debug("RoomEditMenu", p.getName() + " clicked slot " + e.getSlot() + " in edit menu for room " + room.getName());
         
         switch (e.getSlot()) {
             case 10: // Rename

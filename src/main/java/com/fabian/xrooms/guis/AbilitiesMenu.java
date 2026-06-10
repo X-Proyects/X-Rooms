@@ -2,6 +2,7 @@ package com.fabian.xrooms.guis;
 
 import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -110,6 +111,7 @@ public class AbilitiesMenu extends Menu {
 
     @Override
     public void setMenuItems() {
+        DebugLogger.debug("AbilitiesMenu", "Opening abilities menu for room " + room.getName());
         fillBorders(XMaterial.PURPLE_STAINED_GLASS_PANE.parseMaterial());
 
         for (int i = 0; i < ABILITIES.length; i++) {

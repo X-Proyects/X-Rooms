@@ -1,6 +1,7 @@
 package com.fabian.xrooms.models;
 
 import lombok.Data;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
@@ -64,5 +65,10 @@ public class Room {
         return loc.getX() >= minX && loc.getX() <= maxX &&
                loc.getY() >= minY && loc.getY() <= maxY &&
                loc.getZ() >= minZ && loc.getZ() <= maxZ;
+    }
+
+    public void setState(RoomState state) {
+        DebugLogger.debug("Room", "Room '" + name + "' state changed: " + this.state + " -> " + state);
+        this.state = state;
     }
 }

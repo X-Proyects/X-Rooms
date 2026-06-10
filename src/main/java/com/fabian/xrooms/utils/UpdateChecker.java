@@ -30,6 +30,7 @@ public class UpdateChecker {
     }
 
     public void checkForUpdates(CommandSender sender) {
+        DebugLogger.debug("UpdateChecker", "Checking for updates (sender=" + (sender != null ? sender.getName() : "console") + ")");
         plugin.getSchedulerUtil().runAsync(() -> {
             try {
                 String currentVersion = plugin.getDescription().getVersion();
@@ -49,6 +50,7 @@ public class UpdateChecker {
 
                 if (latestVersion != null && isNewer(currentVersion, latestVersion)) {
                     this.updateAvailable = true;
+                    DebugLogger.debug("UpdateChecker", "Update available: " + currentVersion + " -> " + latestVersion);
                     ConfigManager cm = plugin.getConfigManager();
                     
                     String msgRaw = cm.getMessages().getString("update-available", "&aNew update available! &e{latest} &7(Current: {current})");
@@ -70,6 +72,7 @@ public class UpdateChecker {
                 }
 
             } catch (Exception e) {
+                DebugLogger.debug("UpdateChecker", "Failed to check for updates", e);
                 // Ignore update errors
             }
         });

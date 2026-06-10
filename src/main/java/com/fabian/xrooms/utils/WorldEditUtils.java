@@ -223,6 +223,7 @@ public class WorldEditUtils {
     public static void pasteSchematic(org.bukkit.plugin.Plugin plugin, com.fabian.xrooms.models.Room room, Consumer<Boolean> callback) {
         File schematicsFolder = new File(plugin.getDataFolder(), "schematics");
         File file = new File(schematicsFolder, room.getName() + ".schem");
+        DebugLogger.debug("WorldEditUtils", "Pasting schematic for room " + room.getName() + " (file=" + file.getName() + ")");
         if (!file.exists()) {
             if (callback != null) Bukkit.getScheduler().runTask(plugin, () -> callback.accept(false));
             return;
@@ -275,10 +276,12 @@ public class WorldEditUtils {
             // Run the blocking paste operation asynchronously
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
+                    DebugLogger.debug("WorldEditUtils", "Starting async paste for room " + room.getName());
                     Class<?> operationsClass = Class.forName("com.sk89q.worldedit.function.operation.Operations");
                     operationsClass.getMethod("complete", Class.forName("com.sk89q.worldedit.function.operation.Operation")).invoke(null, pasteOperation);
                     
                     editSession.getClass().getMethod("close").invoke(editSession);
+                    DebugLogger.debug("WorldEditUtils", "Paste completed for room " + room.getName());
 
                     if (callback != null) {
                         Bukkit.getScheduler().runTask(plugin, () -> callback.accept(true));

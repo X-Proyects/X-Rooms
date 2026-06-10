@@ -1,6 +1,7 @@
 package com.fabian.xrooms.listeners;
 
 import com.fabian.xrooms.guis.Menu;
+import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -15,6 +16,7 @@ public class MenuListener implements Listener {
             Menu menu = (Menu) holder;
             if (menu.cancelClick()) e.setCancelled(true);
             if (e.getCurrentItem() == null) return;
+            DebugLogger.debug("MenuListener", "Click in menu " + menu.getClass().getSimpleName() + " slot=" + e.getSlot() + " item=" + e.getCurrentItem().getType());
             menu.handleMenu(e);
         }
     }
