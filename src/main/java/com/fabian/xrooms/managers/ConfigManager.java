@@ -2,9 +2,9 @@ package com.fabian.xrooms.managers;
 
 import com.fabian.xrooms.XRooms;
 import lombok.Getter;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import com.fabian.xrooms.utils.ColorUtils;
 import com.fabian.xrooms.utils.ConfigUpdater;
 
 import java.io.File;
@@ -157,26 +157,7 @@ public class ConfigManager {
     }
 
     public String color(String text) {
-        if (text == null) return "";
-        
-        // Support for hex colors (&#RRGGBB) - Only 1.16+
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("&#([A-Fa-f0-9]{6})");
-        java.util.regex.Matcher matcher = pattern.matcher(text);
-        StringBuffer buffer = new StringBuffer();
-        
-        while (matcher.find()) {
-            String color = matcher.group(1);
-            try {
-                // net.md_5.bungee.api.ChatColor.of(String) is available in 1.16+
-                matcher.appendReplacement(buffer, net.md_5.bungee.api.ChatColor.of("#" + color).toString());
-            } catch (NoSuchMethodError | NoClassDefFoundError | Exception e) {
-                // Fallback for 1.8.8 - 1.15.2 (Strip hex and just use legacy)
-                matcher.appendReplacement(buffer, "");
-            }
-        }
-        matcher.appendTail(buffer);
-        
-        return ChatColor.translateAlternateColorCodes('&', buffer.toString());
+        return ColorUtils.translateColors(text);
     }
 
     public String setPlaceholders(org.bukkit.entity.Player player, String text) {
