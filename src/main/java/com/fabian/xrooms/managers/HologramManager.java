@@ -22,7 +22,7 @@ public class HologramManager {
         DebugLogger.debug("HologramManager", "Provider detection: DH=" + dhEnabled + " HD=" + hdEnabled);
 
         if (!dhEnabled && !hdEnabled) {
-            plugin.getLogger().warning("No compatible hologram plugin found (DecentHolograms or HolographicDisplays). Holograms will be disabled.");
+            plugin.logWarning("No compatible hologram plugin found (DecentHolograms or HolographicDisplays). Holograms will be disabled.");
         }
     }
 

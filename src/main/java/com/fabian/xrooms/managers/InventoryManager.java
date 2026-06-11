@@ -37,7 +37,7 @@ public class InventoryManager {
         try {
             config.save(file);
         } catch (IOException e) {
-            plugin.getLogger().severe("Could not save inventory for player " + p.getName());
+            plugin.logError("Could not save inventory for player " + p.getName());
             e.printStackTrace();
         }
 

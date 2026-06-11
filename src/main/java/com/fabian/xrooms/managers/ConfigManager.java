@@ -49,14 +49,14 @@ public class ConfigManager {
             
             if (currentVersion < internalVersion) {
                 DebugLogger.debug("ConfigManager", "Config outdated: v" + currentVersion + " -> v" + internalVersion);
-                plugin.getLogger().info("Updating config.yml from version " + currentVersion + " to " + internalVersion);
+                plugin.logInfo("Updating config.yml from version " + currentVersion + " to " + internalVersion);
                 
                 // 1. Create backup (Copy instead of Rename to keep the file accessible for ConfigUpdater)
                 File backupFile = new File(plugin.getDataFolder(), "config_old.yml");
                 try {
                     com.google.common.io.Files.copy(configFile, backupFile);
                 } catch (java.io.IOException e) {
-                    plugin.getLogger().warning("Could not create backup of config.yml");
+                    plugin.logWarning("Could not create backup of config.yml");
                 }
                 
                 // 2. The ConfigUpdater below will handle merging new keys and keeping old values.
@@ -72,7 +72,7 @@ public class ConfigManager {
             DebugLogger.debug("ConfigManager", "ConfigUpdater merged config.yml");
         } catch (Exception e) {
             DebugLogger.debug("ConfigManager", "Failed to auto-update config.yml", e);
-            plugin.getLogger().warning("Failed to auto-update config.yml");
+            plugin.logWarning("Failed to auto-update config.yml");
             e.printStackTrace();
         }
         
@@ -130,7 +130,7 @@ public class ConfigManager {
             try {
                 ConfigUpdater.update(plugin, "messages/" + lang + ".yml", messagesFile);
             } catch (Exception e) {
-                plugin.getLogger().warning("Failed to auto-update messages/" + lang + ".yml");
+                plugin.logWarning("Failed to auto-update messages/" + lang + ".yml");
                 e.printStackTrace();
             }
         }

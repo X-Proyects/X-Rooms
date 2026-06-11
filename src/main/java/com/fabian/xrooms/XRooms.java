@@ -137,6 +137,18 @@ public class XRooms extends JavaPlugin {
         }
     }
 
+    public void logInfo(String message) {
+        getLogger().info(message);
+    }
+
+    public void logWarning(String message) {
+        getLogger().warning(message);
+    }
+
+    public void logError(String message) {
+        getLogger().severe(message);
+    }
+
     private void sendConsole(String message) {
         org.bukkit.Bukkit.getConsoleSender().sendMessage(configManager.color(CONSOLE_PREFIX + message));
     }

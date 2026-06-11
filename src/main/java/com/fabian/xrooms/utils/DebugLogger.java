@@ -5,7 +5,7 @@ import org.bukkit.Bukkit;
 
 public final class DebugLogger {
 
-    private static final String PREFIX = "&8[&bX-Rooms&8] &b[DEBUG] &7";
+    private static final String PREFIX = "&8[&bDEBUG&8]&r ";
 
     private DebugLogger() {}
 
@@ -29,13 +29,13 @@ public final class DebugLogger {
 
     public static void debug(String category, String message) {
         if (isDebugEnabled()) {
-            Bukkit.getConsoleSender().sendMessage(ColorUtils.translateColors(PREFIX + "&f[" + category + "&f] &7" + message));
+            Bukkit.getConsoleSender().sendMessage(ColorUtils.translateColors(PREFIX + "&f[" + category + "&f]&r &7" + message));
         }
     }
 
     public static void debug(String category, String message, Throwable throwable) {
         if (isDebugEnabled()) {
-            Bukkit.getConsoleSender().sendMessage(ColorUtils.translateColors(PREFIX + "&f[" + category + "&f] &7" + message));
+            Bukkit.getConsoleSender().sendMessage(ColorUtils.translateColors(PREFIX + "&f[" + category + "&f]&r &7" + message));
             throwable.printStackTrace();
         }
     }
