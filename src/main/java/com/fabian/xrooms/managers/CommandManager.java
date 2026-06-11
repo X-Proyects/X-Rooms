@@ -38,6 +38,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             completions.add("edit");
             completions.add("tp");
             completions.add("saveschematic");
+            completions.add("debug");
             return completions.stream()
                     .filter(s -> s.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
@@ -166,6 +167,15 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             } else {
                 sendConsoleHelp(sender);
             }
+            return true;
+        }
+
+        if (sub.equals("debug")) {
+            boolean dbg = plugin.getConfigManager().getConfig().getBoolean("debug", false);
+            plugin.getConfig().set("debug", !dbg);
+            plugin.saveConfig();
+            sender.sendMessage(com.fabian.xrooms.utils.ColorUtils.translateColors(
+                    "&8[&bX-Rooms&8] &7Debug mode: " + (!dbg ? "&aenabled" : "&cdisabled")));
             return true;
         }
 
