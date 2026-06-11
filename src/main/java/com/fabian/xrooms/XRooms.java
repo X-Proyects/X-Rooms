@@ -1,7 +1,7 @@
 package com.fabian.xrooms;
 
 import com.fabian.xrooms.managers.ConfigManager;
-import com.fabian.xrooms.managers.CommandManager;
+import com.fabian.xrooms.commands.CommandManager;
 import com.fabian.xrooms.managers.DependencyManager;
 import com.fabian.xrooms.managers.PermissionManager;
 import com.fabian.xrooms.managers.RoomManager;

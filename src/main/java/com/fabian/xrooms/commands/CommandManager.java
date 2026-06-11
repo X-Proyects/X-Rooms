@@ -1,4 +1,4 @@
-package com.fabian.xrooms.managers;
+package com.fabian.xrooms.commands;
 
 import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.guis.RoomsMenu;
