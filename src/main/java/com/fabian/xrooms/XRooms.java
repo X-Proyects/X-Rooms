@@ -13,6 +13,7 @@ import com.fabian.xrooms.utils.SchedulerUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.event.EventHandler;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
@@ -32,6 +33,7 @@ public class XRooms extends JavaPlugin {
     private ChatInputManager chatInputManager;
     private InventoryManager inventoryManager;
     private SchedulerUtil xScheduler;
+    private com.fabian.xrooms.utils.UpdateChecker updateChecker;
 
     @Override
     public void onEnable() {
@@ -105,10 +107,32 @@ public class XRooms extends JavaPlugin {
         }
 
         // Check for updates
-        if (configManager.getConfig().getBoolean("check-updates", true)) {
+        if (configManager.getConfig().getBoolean("updates.check", true)) {
             DebugLogger.debug("Update", "Update checker enabled, scheduling check");
-            xScheduler.runAsync(() -> new com.fabian.xrooms.utils.UpdateChecker(this).checkForUpdates());
+            this.updateChecker = new com.fabian.xrooms.utils.UpdateChecker(this);
+            xScheduler.runAsync(() -> updateChecker.checkForUpdates());
         }
+
+        // Register update notification listener
+        final var ucRef = this.updateChecker;
+        getServer().getPluginManager().registerEvents(new org.bukkit.event.Listener() {
+            @EventHandler
+            public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
+                org.bukkit.entity.Player player = event.getPlayer();
+                if (!player.isOp() && !player.hasPermission("xrooms.admin")) return;
+                if (!configManager.getConfig().getBoolean("updates.notify-on-join", true)) return;
+                if (ucRef == null) return;
+                if (ucRef.isUpdateAvailable()) {
+                    DebugLogger.debug("UpdateListener", "Notifying admin " + player.getName() + " about update");
+                    String current = getDescription().getVersion();
+                    String latest = ucRef.getLatestVersion();
+                    player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&',
+                            "&8[&bX-Rooms&8] &eA new version is available: &a" + latest + " &e(current: &c" + current + "&e)"));
+                    player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&',
+                            "&8[&bX-Rooms&8] &7Download it at: &f" + ucRef.getDownloadUrl()));
+                }
+            }
+        }, this);
 
         // Initialize bStats Metrics
         setupMetrics();
