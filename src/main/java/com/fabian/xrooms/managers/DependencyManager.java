@@ -111,7 +111,7 @@ public class DependencyManager {
         Library xseries = Library.builder()
                 .groupId("com.github.cryptomorin")
                 .artifactId("XSeries")
-                .version("11.2.0.1")
+                .version("13.6.0")
                 .build();
 
         libraryManager.loadLibrary(xseries);
