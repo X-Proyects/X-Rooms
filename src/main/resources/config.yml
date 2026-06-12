@@ -1,14 +1,26 @@
-#  __   __      ____    ___    ___   __  __  ____ 
-#  \ \ / /     |  _ \  / _ \  / _ \ |  \/  |/ ___|
-#   \ V /_____ | |_) || | | || | | || |\/| |\___ \
-#    > <|_____||  _ < | |_| || |_| || |  | | ___) |
-#   /_/ \_\    |_| \_\ \___/  \___/ |_|  |_||____/ 
-#                                                  
-# ==============================================================================
-# X-Rooms | Developed by Fabian (X-Proyects)
-# Discord: http://discord.xproyects.qzz.io/
-# Supported versions: 1.8.8 - 1.21.x
-# ==============================================================================
+#
+#  __  __  ___  ____   ____ _     ____ _____
+# |  \/  |/ _ \|  _ \ / ___| |   / ___|_   _|
+# | |\/| | | | | |_) | |   | |  | |  _  | |
+# | |  | | |_| |  _ <| |___| |__| |_| | | |
+# |_|  |_|\___/|_| \_\\____|_____\____| |_|
+#
+# ======================================================== #
+#    X-Rooms | PvP Arena & Room Management Plugin for Minecraft #
+#    Author: Fabian | Web: https://xproyects.qzz.io              #
+# ======================================================== #
+#
+# Features:
+#   - Create PvP rooms/arenas with custom kits and abilities
+#   - Countdown system with barrier blocking during warmup
+#   - Per-room hologram support (DecentHolograms / HolographicDisplays)
+#   - WorldEdit schematic support for arena reset
+#   - Inventory management: own items or room kits
+#   - Combat logging protection with configurable penalties
+#   - Per-room min/max players, time limits, and cooldowns
+#   - PlaceholderAPI expansion with room-related placeholders
+#
+# Supported versions: 1.8.8 - 1.21.x (Paper, Spigot)
 
 # [ SYSTEM SETTINGS ]
 # Internal configuration version. Do not change this value.
