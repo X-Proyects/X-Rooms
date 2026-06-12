@@ -1,4 +1,4 @@
-package com.fabian.xrooms.guis;
+package com.fabian.xrooms.menus;
 
 import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;

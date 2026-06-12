@@ -1,4 +1,4 @@
-package com.fabian.xrooms.placeholders;
+package com.fabian.xrooms.hooks;
 
 import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.models.Room;

@@ -1,7 +1,7 @@
 package com.fabian.xrooms.commands;
 
 import com.fabian.xrooms.XRooms;
-import com.fabian.xrooms.guis.RoomsMenu;
+import com.fabian.xrooms.menus.RoomsMenu;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.utils.DebugLogger;
 import com.fabian.xrooms.utils.WorldEditUtils;
@@ -521,7 +521,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
                     player.sendMessage(plugin.getConfigManager().getMessage("room-edited").replace("{room}", roomName));
                     break;
                 case "view-equipment":
-                    new com.fabian.xrooms.guis.EquipmentViewMenu(room, true).open(player);
+                    new com.fabian.xrooms.menus.EquipmentViewMenu(room, true).open(player);
                     break;
                 case "abilities":
                 case "ability":
@@ -557,7 +557,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
                     break;
                 case "reward":
                 case "equipment":
-                    new com.fabian.xrooms.guis.RoomEditMenu(room).open(player);
+                    new com.fabian.xrooms.menus.RoomEditMenu(room).open(player);
                     break;
                 case "schematic-reset":
                     if (args.length < 4) {

@@ -1,6 +1,6 @@
 package com.fabian.xrooms.listeners;
 
-import com.fabian.xrooms.guis.Menu;
+import com.fabian.xrooms.menus.Menu;
 import com.fabian.xrooms.utils.DebugLogger;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

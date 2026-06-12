@@ -100,7 +100,7 @@ public class XRooms extends JavaPlugin {
 
         // Placeholders
         if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            new com.fabian.xrooms.placeholders.XRoomsExpansion(this).register();
+            new com.fabian.xrooms.hooks.XRoomsExpansion(this).register();
             DebugLogger.debug("Enable", "PlaceholderAPI expansion registered");
         }
 

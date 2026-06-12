@@ -1,4 +1,4 @@
-package com.fabian.xrooms.guis;
+package com.fabian.xrooms.menus;
 
 import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.utils.DebugLogger;
