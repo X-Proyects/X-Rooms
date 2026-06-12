@@ -61,7 +61,7 @@ public class Room {
     }
 
     public boolean isInside(Location loc) {
-        if (!loc.getWorld().getName().equals(worldName)) return false;
+        if (loc.getWorld() == null || !loc.getWorld().getName().equals(worldName)) return false;
         return loc.getX() >= minX && loc.getX() <= maxX &&
                loc.getY() >= minY && loc.getY() <= maxY &&
                loc.getZ() >= minZ && loc.getZ() <= maxZ;

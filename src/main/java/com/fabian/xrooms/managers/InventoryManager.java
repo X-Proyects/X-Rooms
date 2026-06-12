@@ -55,15 +55,21 @@ public class InventoryManager {
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        // Restore inventory
+        // Restore inventory (handle both ItemStack and Map/ConfigurationSerialization)
         if (config.contains("inventory")) {
-            List<ItemStack> inv = (List<ItemStack>) config.get("inventory");
-            if (inv != null) p.getInventory().setContents(inv.toArray(new ItemStack[0]));
+            List<?> raw = config.getList("inventory");
+            if (raw != null) {
+                List<ItemStack> inv = deserializeItemList(raw);
+                p.getInventory().setContents(inv.toArray(new ItemStack[0]));
+            }
         }
 
         if (config.contains("armor")) {
-            List<ItemStack> armor = (List<ItemStack>) config.get("armor");
-            if (armor != null) p.getInventory().setArmorContents(armor.toArray(new ItemStack[0]));
+            List<?> raw = config.getList("armor");
+            if (raw != null) {
+                List<ItemStack> armor = deserializeItemList(raw);
+                p.getInventory().setArmorContents(armor.toArray(new ItemStack[0]));
+            }
         }
 
         p.updateInventory();
@@ -77,6 +83,27 @@ public class InventoryManager {
         if (file.exists()) {
             file.delete();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<ItemStack> deserializeItemList(List<?> raw) {
+        List<ItemStack> result = new java.util.ArrayList<>();
+        for (Object entry : raw) {
+            if (entry == null) {
+                result.add(null);
+            } else if (entry instanceof ItemStack) {
+                result.add((ItemStack) entry);
+            } else if (entry instanceof Map) {
+                try {
+                    Object deserialized = org.bukkit.configuration.serialization.ConfigurationSerialization
+                            .deserializeObject((Map<String, Object>) entry);
+                    if (deserialized instanceof ItemStack) {
+                        result.add((ItemStack) deserialized);
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+        return result;
     }
 }
 

@@ -16,10 +16,16 @@ public class StorageMenu extends Menu {
 
     private final Room room;
     private final String type; // "rewards" or "equipment"
+    private final boolean fromRewards;
 
     public StorageMenu(Room room, String type) {
+        this(room, type, false);
+    }
+
+    public StorageMenu(Room room, String type, boolean fromRewards) {
         this.room = room;
         this.type = type;
+        this.fromRewards = fromRewards;
     }
 
     @Override
@@ -38,12 +44,20 @@ public class StorageMenu extends Menu {
         Player p = (Player) e.getWhoClicked();
         if (e.getSlot() == 45) { // Cancel
             p.closeInventory();
-            new EquipmentSelectionMenu(room).open(p);
+            if (fromRewards) {
+                new RoomEditMenu(room).open(p);
+            } else {
+                new EquipmentSelectionMenu(room).open(p);
+            }
         } else if (e.getSlot() == 53) { // Save
             save(e.getInventory());
             p.closeInventory();
             p.sendMessage(plugin.getConfigManager().getMessage("room-edited").replace("{room}", room.getName()));
-            new EquipmentSelectionMenu(room).open(p);
+            if (fromRewards) {
+                new RoomEditMenu(room).open(p);
+            } else {
+                new EquipmentSelectionMenu(room).open(p);
+            }
         }
     }
 

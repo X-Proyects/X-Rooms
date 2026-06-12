@@ -14,6 +14,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -299,6 +300,20 @@ public class RoomListener implements Listener {
     }
 
     @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        Room room = currentRooms.get(p.getUniqueId());
+        if (room != null && room.getState() != RoomState.WAITING) {
+            // Player reconnected during an active/ending match — they already left, restore inventory
+            DebugLogger.debug("RoomListener", p.getName() + " rejoined while room " + room.getName() + " was in state " + room.getState() + " — cleaning up");
+            currentRooms.remove(p.getUniqueId());
+            if (!plugin.getConfigManager().isUseOwnInventory()) {
+                plugin.getInventoryManager().restoreInventory(p);
+            }
+        }
+    }
+
+    @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
         Room room = currentRooms.get(p.getUniqueId());
@@ -318,7 +333,7 @@ public class RoomListener implements Listener {
             } else {
                 leaveRoomRegion(p, room);
             }
-            plugin.getSchedulerUtil().teleport(p, p.getWorld().getSpawnLocation());
+            // Player is disconnecting, teleporting is pointless — just clean up the map
             currentRooms.remove(p.getUniqueId());
         }
     }

@@ -413,15 +413,21 @@ public class CommandManager implements CommandExecutor, TabCompleter {
                     }
                     break;
                 case "entry-sound":
+                    if (args.length < 4) {
+                        player.sendMessage(plugin.getConfigManager().getMessage("usage").replace("{usage}", plugin.getConfigManager().getMessageRaw("usage-edit-entry-sound").replace("{room}", roomName)));
+                        return true;
+                    }
                     player.sendMessage(plugin.getConfigManager().getMessage("sound-info-entry"));
-                    player.sendMessage(plugin.getConfigManager().getMessage("usage").replace("{usage}", plugin.getConfigManager().getMessageRaw("usage-edit-entry-sound").replace("{room}", roomName)));
                     room.setEntrySound(args[3].toUpperCase());
                     plugin.getRoomManager().saveRoom(room);
                     player.sendMessage(plugin.getConfigManager().getMessage("room-edited").replace("{room}", roomName));
                     break;
                 case "kill-sound":
+                    if (args.length < 4) {
+                        player.sendMessage(plugin.getConfigManager().getMessage("usage").replace("{usage}", plugin.getConfigManager().getMessageRaw("usage-edit-kill-sound").replace("{room}", roomName)));
+                        return true;
+                    }
                     player.sendMessage(plugin.getConfigManager().getMessage("sound-info-kill"));
-                    player.sendMessage(plugin.getConfigManager().getMessage("usage").replace("{usage}", plugin.getConfigManager().getMessageRaw("usage-edit-kill-sound").replace("{room}", roomName)));
                     room.setKillSound(args[3].toUpperCase());
                     plugin.getRoomManager().saveRoom(room);
                     player.sendMessage(plugin.getConfigManager().getMessage("room-edited").replace("{room}", roomName));
@@ -525,8 +531,11 @@ public class CommandManager implements CommandExecutor, TabCompleter {
                     break;
                 case "abilities":
                 case "ability":
-                    player.sendMessage(plugin.getConfigManager().getMessage("abilities-info"));
-                    player.sendMessage(plugin.getConfigManager().getMessage("usage").replace("{usage}", plugin.getConfigManager().getMessageRaw("usage-edit-abilities").replace("{room}", roomName)));
+                    if (args.length < 4) {
+                        player.sendMessage(plugin.getConfigManager().getMessage("usage").replace("{usage}", plugin.getConfigManager().getMessageRaw("usage-edit-abilities").replace("{room}", roomName)));
+                        player.sendMessage(plugin.getConfigManager().getMessage("abilities-info"));
+                        return true;
+                    }
                     String ability = args[3].toLowerCase();
                     int level = 1;
                     if (args.length >= 5) {

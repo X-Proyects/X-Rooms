@@ -24,21 +24,31 @@ public class SchedulerUtil {
     }
 
     public void runTimer(Runnable runnable, long delay, long period) {
+        runTimer(runnable, delay, period, null);
+    }
+
+    /**
+     * @param resultConsumer if not null, the BukkitTask / Folia ScheduledTask will be set via accept()
+     */
+    @SuppressWarnings("unchecked")
+    public void runTimer(Runnable runnable, long delay, long period, java.util.function.Consumer<Object> resultConsumer) {
         if (isFolia) {
             try {
                 Object server = Bukkit.class.getMethod("getGlobalRegionScheduler").invoke(null);
                 Method runMethod = server.getClass().getMethod("runAtFixedRate", 
                         org.bukkit.plugin.Plugin.class, java.util.function.Consumer.class, long.class, long.class);
                 
-                // Folia's consumer receives a scheduled task, we just wrap our runnable
-                runMethod.invoke(server, plugin, (java.util.function.Consumer<Object>) task -> runnable.run(), delay, period);
+                runMethod.invoke(server, plugin, (java.util.function.Consumer<Object>) task -> {
+                    if (resultConsumer != null) resultConsumer.accept(task);
+                    runnable.run();
+                }, delay, period);
+                return;
             } catch (Exception e) {
                 // Fallback to Bukkit if reflection fails
-                Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period);
             }
-        } else {
-            Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period);
         }
+        org.bukkit.scheduler.BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period);
+        if (resultConsumer != null) resultConsumer.accept(task);
     }
 
     public void runTaskLater(Runnable runnable, long delay) {

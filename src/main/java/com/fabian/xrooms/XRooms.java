@@ -8,6 +8,7 @@ import com.fabian.xrooms.managers.RoomManager;
 import com.fabian.xrooms.managers.HologramManager;
 import com.fabian.xrooms.managers.ChatInputManager;
 import com.fabian.xrooms.managers.InventoryManager;
+import com.fabian.xrooms.utils.ColorUtils;
 import com.fabian.xrooms.utils.DebugLogger;
 import com.fabian.xrooms.utils.SchedulerUtil;
 import lombok.Getter;
@@ -119,6 +120,7 @@ public class XRooms extends JavaPlugin {
         if (schematicTask != null) {
             try {
                 schematicTask.getClass().getMethod("cancel").invoke(schematicTask);
+                DebugLogger.debug("SchematicTask", "Previous auto-reset task cancelled");
             } catch (Exception ignored) {}
             schematicTask = null;
         }
@@ -133,7 +135,9 @@ public class XRooms extends JavaPlugin {
                         com.fabian.xrooms.utils.WorldEditUtils.pasteSchematic(this, room);
                     }
                 }
-            }, ticks, ticks);
+            }, ticks, ticks, task -> {
+                this.schematicTask = task;
+            });
         }
     }
 
@@ -150,16 +154,30 @@ public class XRooms extends JavaPlugin {
     }
 
     private void sendConsole(String message) {
-        org.bukkit.Bukkit.getConsoleSender().sendMessage(configManager.color(CONSOLE_PREFIX + message));
+        try {
+            org.bukkit.Bukkit.getConsoleSender().sendMessage(configManager.color(CONSOLE_PREFIX + message));
+        } catch (NoClassDefFoundError e) {
+            // Adventure not loaded, fallback to native logger
+            getLogger().info(ColorUtils.translateColors(CONSOLE_PREFIX + message));
+        }
     }
 
     @Override
     public void onDisable() {
         DebugLogger.debug("Disable", "Plugin disable sequence started");
+        if (schematicTask != null) {
+            try {
+                schematicTask.getClass().getMethod("cancel").invoke(schematicTask);
+            } catch (Exception ignored) {}
+            schematicTask = null;
+        }
+        if (hologramManager != null) {
+            hologramManager.cleanup();
+        }
         if (roomManager != null) {
             roomManager.saveAll();
             DebugLogger.debug("Disable", "All rooms saved");
         }
-        org.bukkit.Bukkit.getConsoleSender().sendMessage(configManager.color(CONSOLE_PREFIX + "&cSuccessfully disabled!"));
+        getLogger().info("X-Rooms disabled successfully.");
     }
 }

@@ -118,14 +118,18 @@ public class ConfigManager {
     }
 
     public void setupMessages() {
-        String lang = config.getString("language", "es");
+        String lang = config.getString("language", "en");
         File messagesFile = new File(plugin.getDataFolder(), "messages/" + lang + ".yml");
-        
-        if (!messagesFile.exists()) {
-            plugin.saveResource("messages/es.yml", false);
+
+        // Ensure at least en.yml and es.yml exist on disk
+        if (!new File(plugin.getDataFolder(), "messages/en.yml").exists()) {
             plugin.saveResource("messages/en.yml", false);
-            plugin.saveResource("messages/fr.yml", false);
-        } else {
+        }
+        if (!new File(plugin.getDataFolder(), "messages/es.yml").exists()) {
+            plugin.saveResource("messages/es.yml", false);
+        }
+
+        if (messagesFile.exists()) {
             // Update the current language file
             try {
                 ConfigUpdater.update(plugin, "messages/" + lang + ".yml", messagesFile);
@@ -133,9 +137,25 @@ public class ConfigManager {
                 plugin.logWarning("Failed to auto-update messages/" + lang + ".yml");
                 e.printStackTrace();
             }
+        } else {
+            plugin.logWarning("Language file messages/" + lang + ".yml not found, falling back to en.yml");
+            messagesFile = new File(plugin.getDataFolder(), "messages/en.yml");
+            lang = "en";
         }
-        
-        this.messages = YamlConfiguration.loadConfiguration(messagesFile);
+
+        // Try to load, fall back to en.yml if corrupt
+        YamlConfiguration loaded = null;
+        try {
+            loaded = YamlConfiguration.loadConfiguration(messagesFile);
+            if (loaded.getKeys(false).isEmpty()) {
+                throw new RuntimeException("Empty or corrupt messages file");
+            }
+        } catch (Exception e) {
+            plugin.logWarning("Messages file messages/" + lang + ".yml is corrupt, falling back to en.yml");
+            loaded = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages/en.yml"));
+        }
+
+        this.messages = loaded;
         messageCache.clear();
     }
 

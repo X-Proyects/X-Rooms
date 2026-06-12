@@ -45,7 +45,7 @@ public class RoomEditMenu extends Menu {
                         .replace("{perm}", "xrooms.player." + room.getName().toLowerCase()));
                 break;
             case 14: // Rewards
-                new StorageMenu(room, "rewards").open(p);
+                new StorageMenu(room, "rewards", true).open(p);
                 break;
             case 16: // Equipment Selection (New)
                 new EquipmentSelectionMenu(room).open(p);
