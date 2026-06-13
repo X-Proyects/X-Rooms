@@ -51,7 +51,7 @@ public class ConfigManager {
             
             if (currentVersion < internalVersion) {
                 DebugLogger.debug("ConfigManager", "Config outdated: v" + currentVersion + " -> v" + internalVersion);
-                plugin.logInfo("Updating config.yml from version " + currentVersion + " to " + internalVersion);
+                plugin.logInfo("&eUpdating config.yml from version &f" + currentVersion + " &7to &a" + internalVersion);
                 
                 // 1. Create backup (Copy instead of Rename to keep the file accessible for ConfigUpdater)
                 File backupFile = new File(plugin.getDataFolder(), "config_old.yml");
