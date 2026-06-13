@@ -31,7 +31,7 @@ public class UpdateChecker {
 
     public void checkForUpdates(CommandSender sender) {
         DebugLogger.debug("UpdateChecker", "Checking for updates (sender=" + (sender != null ? sender.getName() : "console") + ")");
-        plugin.getSchedulerUtil().runAsync(() -> {
+        plugin.getXScheduler().runAsync(() -> {
             try {
                 String currentVersion = plugin.getDescription().getVersion();
                 

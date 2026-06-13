@@ -1,7 +1,7 @@
 package com.fabian.xrooms;
 
 import com.fabian.xrooms.managers.ConfigManager;
-import com.fabian.xrooms.managers.CommandManager;
+import com.fabian.xrooms.commands.CommandManager;
 import com.fabian.xrooms.managers.DependencyManager;
 import com.fabian.xrooms.managers.PermissionManager;
 import com.fabian.xrooms.managers.RoomManager;
@@ -86,7 +86,7 @@ public class XRooms extends JavaPlugin {
             // PlaceholderAPI Integration
             if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
                 DebugLogger.debug("PAPI", "PlaceholderAPI found, registering expansion");
-                new com.fabian.xrooms.placeholders.XRoomsExpansion(this).register();
+                new com.fabian.xrooms.hooks.XRoomsExpansion(this).register();
             } else {
                 DebugLogger.debug("PAPI", "PlaceholderAPI not found, skipping expansion");
             }
@@ -114,7 +114,7 @@ public class XRooms extends JavaPlugin {
         }
 
         // Register update notification listener
-        final var ucRef = this.updateChecker;
+        final com.fabian.xrooms.utils.UpdateChecker ucRef = this.updateChecker;
         getServer().getPluginManager().registerEvents(new org.bukkit.event.Listener() {
             @EventHandler
             public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {

@@ -98,10 +98,6 @@ public class ColorUtils {
     }
 
     public static void sendComponent(CommandSender sender, Component component) {
-        try {
-            sender.sendMessage(component);
-            return;
-        } catch (NoSuchMethodError | NoClassDefFoundError e) {}
         sender.sendMessage(toLegacyString(component));
     }
 

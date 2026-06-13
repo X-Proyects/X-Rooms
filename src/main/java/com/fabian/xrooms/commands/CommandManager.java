@@ -1,6 +1,7 @@
 package com.fabian.xrooms.commands;
 
 import com.fabian.xrooms.XRooms;
+import com.fabian.xrooms.managers.ConfigManager;
 import com.fabian.xrooms.menus.RoomsMenu;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.utils.DebugLogger;
@@ -171,11 +172,24 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         }
 
         if (sub.equals("debug")) {
-            boolean dbg = plugin.getConfigManager().getConfig().getBoolean("debug", false);
-            plugin.getConfig().set("debug", !dbg);
-            plugin.saveConfig();
-            sender.sendMessage(com.fabian.xrooms.utils.ColorUtils.translateColors(
-                    "&8[&bX-Rooms&8] &7Debug mode: " + (!dbg ? "&aenabled" : "&cdisabled")));
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (plugin.getConfigManager().debugPlayer != null && plugin.getConfigManager().debugPlayer.equals(player.getUniqueId())) {
+                    plugin.getConfigManager().debugPlayer = null;
+                    player.sendMessage(com.fabian.xrooms.utils.ColorUtils.translateColors(
+                            plugin.getConfigManager().getPrefix() + "&7Debug mode: &cdisabled"));
+                } else {
+                    plugin.getConfigManager().debugPlayer = player.getUniqueId();
+                    player.sendMessage(com.fabian.xrooms.utils.ColorUtils.translateColors(
+                            plugin.getConfigManager().getPrefix() + "&7Debug mode: &aenabled &7(messages sent to you)"));
+                }
+            } else {
+                boolean dbg = plugin.getConfigManager().getConfig().getBoolean("debug", false);
+                plugin.getConfig().set("debug", !dbg);
+                plugin.saveConfig();
+                sender.sendMessage(com.fabian.xrooms.utils.ColorUtils.translateColors(
+                        plugin.getConfigManager().getPrefix() + "&7Debug mode: " + (!dbg ? "&aenabled &7(console)" : "&cdisabled")));
+            }
             return true;
         }
 
@@ -308,7 +322,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             double cy = room.getMinY() + 1.0;
             double cz = (room.getMinZ() + room.getMaxZ()) / 2.0;
             Location loc = new Location(org.bukkit.Bukkit.getWorld(room.getWorldName()), cx, cy, cz);
-            plugin.getSchedulerUtil().teleport(player, loc);
+            plugin.getXScheduler().teleport(player, loc);
             player.sendMessage(plugin.getConfigManager().getMessage("teleported").replace("{name}", room.getDisplayName()));
             return true;
         }

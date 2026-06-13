@@ -52,14 +52,14 @@ public class ChatInputManager implements Listener {
                 DebugLogger.debug("ChatInputManager", "Input cancelled by " + p.getName());
                 p.sendMessage(plugin.getConfigManager().getMessageRaw("chat-action-cancelled"));
                 if (onCancel != null) {
-                    plugin.getSchedulerUtil().runTask(onCancel);
+                    plugin.getXScheduler().runTask(onCancel);
                 }
                 return;
             }
 
             // Execute the callback on the main thread
             DebugLogger.debug("ChatInputManager", "Processing input from " + p.getName() + ": " + input);
-            plugin.getSchedulerUtil().runTask(() -> callback.accept(input));
+            plugin.getXScheduler().runTask(() -> callback.accept(input));
         }
     }
 }

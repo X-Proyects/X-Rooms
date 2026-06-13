@@ -11,6 +11,7 @@ import com.fabian.xrooms.utils.DebugLogger;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Getter
 public class ConfigManager {
@@ -33,6 +34,7 @@ public class ConfigManager {
     
     private final Map<String, Integer> abilitiesLimits = new HashMap<>();
     private final Map<String, String> messageCache = new HashMap<>();
+    public UUID debugPlayer; // player who enabled debug via command (null = console-only via config)
 
     public ConfigManager(XRooms plugin) {
         this.plugin = plugin;

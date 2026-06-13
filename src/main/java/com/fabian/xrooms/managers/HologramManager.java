@@ -109,27 +109,17 @@ public class HologramManager {
             com.gmail.filoghost.holographicdisplays.api.Hologram existing = hdHolograms.get(name);
 
             if (existing != null) {
-                // Update existing hologram: move and refresh lines
-                if (!existing.getLocation().getWorld().equals(loc.getWorld()) ||
-                    existing.getLocation().distanceSquared(loc) > 1) {
-                    existing.teleport(loc);
-                }
-                // Rebuild lines
-                for (com.gmail.filoghost.holographicdisplays.api.HologramLine line : existing.getLines()) {
-                    line.removeLine();
-                }
-                for (String text : lines) {
-                    existing.appendTextLine(text);
-                }
-            } else {
-                // Create new hologram
-                com.gmail.filoghost.holographicdisplays.api.Hologram holo =
-                        com.gmail.filoghost.holographicdisplays.api.HologramsAPI.createHologram(plugin, loc);
-                for (String line : lines) {
-                    holo.appendTextLine(line);
-                }
-                hdHolograms.put(name, holo);
+                // Delete existing and recreate (avoids HD API compatibility issues)
+                existing.delete();
+                hdHolograms.remove(name);
             }
+            // Create new hologram
+            com.gmail.filoghost.holographicdisplays.api.Hologram holo =
+                    com.gmail.filoghost.holographicdisplays.api.HologramsAPI.createHologram(plugin, loc);
+            for (String text : lines) {
+                holo.appendTextLine(text);
+            }
+            hdHolograms.put(name, holo);
         } catch (NoClassDefFoundError | Exception e) {
             // HolographicDisplays not actually present
         }

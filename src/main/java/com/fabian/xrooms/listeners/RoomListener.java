@@ -40,7 +40,7 @@ public class RoomListener implements Listener {
     }
 
     private void startGlobalTask() {
-        plugin.getSchedulerUtil().runTimer(() -> {
+        plugin.getXScheduler().runTimer(() -> {
             for (Room room : plugin.getRoomManager().getAllRooms()) {
                 if (room.getState() == RoomState.STARTING) {
                     int left = startTimers.getOrDefault(room, plugin.getConfigManager().getStartCountdown());
@@ -251,7 +251,7 @@ public class RoomListener implements Listener {
 
         long delayTicks = plugin.getConfigManager().getEndDelay() * 20L;
         
-        plugin.getSchedulerUtil().runTaskLater(() -> {
+        plugin.getXScheduler().runTaskLater(() -> {
             if (room.isSchematicEnabled()) {
                 WorldEditUtils.pasteSchematic(plugin, room);
             }
@@ -271,10 +271,10 @@ public class RoomListener implements Listener {
                     // If there are more (tie/timeout), they go to spawn.
                     if (isWinner) {
                         if (room.getWinnerLocation() != null) {
-                            plugin.getSchedulerUtil().teleport(p, room.getWinnerLocation());
+                            plugin.getXScheduler().teleport(p, room.getWinnerLocation());
                         }
                     } else {
-                        plugin.getSchedulerUtil().teleport(p, p.getWorld().getSpawnLocation());
+                        plugin.getXScheduler().teleport(p, p.getWorld().getSpawnLocation());
                     }
                 }
             }
