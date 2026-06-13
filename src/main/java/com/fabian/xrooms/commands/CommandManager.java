@@ -176,11 +176,13 @@ public class CommandManager implements CommandExecutor, TabCompleter {
                 Player player = (Player) sender;
                 if (plugin.getConfigManager().debugPlayer != null && plugin.getConfigManager().debugPlayer.equals(player.getUniqueId())) {
                     plugin.getConfigManager().debugPlayer = null;
-                    player.sendMessage(com.fabian.xrooms.utils.ColorUtils.translateColors(
+                    com.fabian.xrooms.utils.ColorUtils.sendComponent(player,
+                            com.fabian.xrooms.utils.ColorUtils.format(player,
                             plugin.getConfigManager().getPrefix() + "&7Debug mode: &cdisabled"));
                 } else {
                     plugin.getConfigManager().debugPlayer = player.getUniqueId();
-                    player.sendMessage(com.fabian.xrooms.utils.ColorUtils.translateColors(
+                    com.fabian.xrooms.utils.ColorUtils.sendComponent(player,
+                            com.fabian.xrooms.utils.ColorUtils.format(player,
                             plugin.getConfigManager().getPrefix() + "&7Debug mode: &aenabled &7(messages sent to you)"));
                 }
             } else {
