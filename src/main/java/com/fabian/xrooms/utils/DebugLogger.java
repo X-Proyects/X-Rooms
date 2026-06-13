@@ -16,7 +16,8 @@ import org.bukkit.entity.Player;
  */
 public final class DebugLogger {
 
-    private static final String PREFIX = "&8[&bDEBUG&8]&r &7";
+    private static final String PLUGIN_NAME = "X-Rooms";
+    private static final String PREFIX = "&8[&bDEBUG&8] &f[" + PLUGIN_NAME + "&f]&r &7";
 
     private DebugLogger() {}
 
