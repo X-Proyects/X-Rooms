@@ -9,6 +9,9 @@ import com.fabian.xrooms.utils.ConfigUpdater;
 import com.fabian.xrooms.utils.DebugLogger;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -148,13 +151,13 @@ public class ConfigManager {
         // Try to load, fall back to en.yml if corrupt
         YamlConfiguration loaded = null;
         try {
-            loaded = YamlConfiguration.loadConfiguration(messagesFile);
+            loaded = YamlConfiguration.loadConfiguration(new InputStreamReader(new FileInputStream(messagesFile), StandardCharsets.UTF_8));
             if (loaded.getKeys(false).isEmpty()) {
                 throw new RuntimeException("Empty or corrupt messages file");
             }
         } catch (Exception e) {
             plugin.logWarning("Messages file messages/" + lang + ".yml is corrupt, falling back to en.yml");
-            loaded = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages/en.yml"));
+            loaded = YamlConfiguration.loadConfiguration(new InputStreamReader(new FileInputStream(new File(plugin.getDataFolder(), "messages/en.yml")), StandardCharsets.UTF_8));
         }
 
         this.messages = loaded;
@@ -175,6 +178,58 @@ public class ConfigManager {
 
     public void sendMessageRaw(org.bukkit.command.CommandSender sender, String text) {
         sender.sendMessage(color(prefix + text));
+    }
+
+    /**
+     * Returns a list of all language files that exist on disk in the messages/ folder (without .yml extension).
+     */
+    public java.util.List<String> getAvailableLanguages() {
+        File messagesDir = new File(plugin.getDataFolder(), "messages");
+        java.util.List<String> langs = new java.util.ArrayList<>();
+        if (messagesDir.exists() && messagesDir.isDirectory()) {
+            File[] files = messagesDir.listFiles((dir, name) -> name.endsWith(".yml"));
+            if (files != null) {
+                for (File f : files) {
+                    langs.add(f.getName().replace(".yml", ""));
+                }
+            }
+        }
+        return langs;
+    }
+
+    /**
+     * Force-regenerate a single message file from JAR defaults (overwrites entirely).
+     * @return true if the file was regenerated, false if the resource was not found
+     */
+    public boolean forceNewMessageFile(String lang) {
+        String resourcePath = "messages/" + lang + ".yml";
+        if (plugin.getResource(resourcePath) == null) return false;
+        File file = new File(plugin.getDataFolder(), resourcePath);
+        plugin.saveResource(resourcePath, true); // overwrite = true
+        DebugLogger.debug("ConfigManager", "Force-regenerated " + resourcePath + " from JAR defaults");
+        return true;
+    }
+
+    /**
+     * Force-update a single message file by adding missing keys from JAR (preserves existing values).
+     * @return true if the file was updated, false if the resource was not found
+     */
+    public boolean forceKeepMessageFile(String lang) {
+        String resourcePath = "messages/" + lang + ".yml";
+        if (plugin.getResource(resourcePath) == null) return false;
+        File file = new File(plugin.getDataFolder(), resourcePath);
+        if (!file.exists()) {
+            plugin.saveResource(resourcePath, false);
+            DebugLogger.debug("ConfigManager", "Force-keep created new file " + resourcePath);
+            return true;
+        }
+        try {
+            ConfigUpdater.update(plugin, resourcePath, file);
+            DebugLogger.debug("ConfigManager", "Force-keep updated " + resourcePath + " with missing keys");
+        } catch (Exception e) {
+            DebugLogger.debug("ConfigManager", "Force-keep failed for " + resourcePath, e);
+        }
+        return true;
     }
 
     public void reload() {

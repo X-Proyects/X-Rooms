@@ -98,7 +98,26 @@ public class ColorUtils {
     }
 
     public static void sendComponent(CommandSender sender, Component component) {
-        sender.sendMessage(toLegacyString(component));
+        String legacy = toLegacyString(component);
+        if (sender instanceof Player) {
+            sender.sendMessage(legacy);
+        } else {
+            sender.sendMessage(org.bukkit.ChatColor.stripColor(legacy));
+        }
+    }
+
+    /**
+     * Sends a pre-formatted string to a CommandSender.
+     * Strips § color codes for non-Player senders (console) to avoid
+     * garbled characters on Windows CP437/CP850.
+     */
+    public static void send(CommandSender sender, String message) {
+        if (sender == null || message == null || message.isEmpty()) return;
+        if (sender instanceof Player) {
+            sender.sendMessage(message);
+        } else {
+            sender.sendMessage(org.bukkit.ChatColor.stripColor(message));
+        }
     }
 
     public static boolean isPAPIAvailable() { return papiAvailable; }

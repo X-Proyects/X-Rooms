@@ -4,6 +4,7 @@ import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.managers.ConfigManager;
 import com.fabian.xrooms.menus.RoomsMenu;
 import com.fabian.xrooms.models.Room;
+import com.fabian.xrooms.utils.ColorUtils;
 import com.fabian.xrooms.utils.DebugLogger;
 import com.fabian.xrooms.utils.WorldEditUtils;
 import org.bukkit.command.Command;
@@ -40,6 +41,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             completions.add("tp");
             completions.add("saveschematic");
             completions.add("debug");
+            completions.add("forcemessages");
             return completions.stream()
                     .filter(s -> s.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
@@ -123,6 +125,23 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             }
         }
         
+        if (args.length == 2 && args[0].equalsIgnoreCase("forcemessages")) {
+            completions.add("new");
+            completions.add("keep");
+            return completions.stream()
+                    .filter(s -> s.startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if (args.length == 3 && args[0].equalsIgnoreCase("forcemessages")) {
+            completions.add("all");
+            java.util.List<String> langs = plugin.getConfigManager().getAvailableLanguages();
+            completions.addAll(langs);
+            return completions.stream()
+                    .filter(s -> s.startsWith(args[2].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
         if (args.length == 5 && args[0].equalsIgnoreCase("edit") && args[2].equalsIgnoreCase("hologram") && args[3].equalsIgnoreCase("line")) {
             completions.add("add");
             completions.add("edit");
@@ -151,14 +170,14 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         // Console-allowed commands
         if (sub.equals("reload")) {
             if (!sender.hasPermission("xrooms.admin.reload")) {
-                sender.sendMessage(plugin.getConfigManager().getMessage("no-permission"));
+                ColorUtils.send(sender, plugin.getConfigManager().getMessage("no-permission"));
                 return true;
             }
             DebugLogger.debug("CommandManager", "Reload command executed");
             plugin.getConfigManager().reload();
             plugin.getRoomManager().loadAll();
             plugin.startSchematicTask();
-            sender.sendMessage(plugin.getConfigManager().getMessage("plugin-reloaded"));
+            ColorUtils.send(sender, plugin.getConfigManager().getMessage("plugin-reloaded"));
             return true;
         }
 
@@ -189,9 +208,19 @@ public class CommandManager implements CommandExecutor, TabCompleter {
                 boolean dbg = plugin.getConfigManager().getConfig().getBoolean("debug", false);
                 plugin.getConfig().set("debug", !dbg);
                 plugin.saveConfig();
-                sender.sendMessage(com.fabian.xrooms.utils.ColorUtils.translateColors(
+                ColorUtils.send(sender, com.fabian.xrooms.utils.ColorUtils.translateColors(
                         plugin.getConfigManager().getPrefix() + "&7Debug mode: " + (!dbg ? "&aenabled &7(console)" : "&cdisabled")));
             }
+            return true;
+        }
+
+        if (sub.equals("forcemessages")) {
+            if (!sender.hasPermission("xrooms.admin.forcemessages")) {
+                ColorUtils.send(sender, plugin.getConfigManager().getMessage("no-permission"));
+                return true;
+            }
+            DebugLogger.debug("CommandManager", "ForceMessages command executed");
+            handleForceMessages(sender, args);
             return true;
         }
 
@@ -621,9 +650,110 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
     private void sendConsoleHelp(CommandSender sender) {
         ConfigManager cm = plugin.getConfigManager();
-        sender.sendMessage(cm.getMessage("help-header"));
-        sender.sendMessage(cm.color("&f" + cm.getMessage("help-reload")));
-        sender.sendMessage(cm.color("&f" + cm.getMessage("help-console-only")));
-        sender.sendMessage(cm.getMessage("help-footer"));
+        ColorUtils.send(sender, cm.getMessage("help-header"));
+        ColorUtils.send(sender, cm.color("&f" + cm.getMessage("help-reload")));
+        ColorUtils.send(sender, cm.color("&f" + cm.getMessage("help-console-only")));
+        ColorUtils.send(sender, cm.getMessage("help-footer"));
+    }
+
+    /**
+     * Handles the /xr forcemessages <new|keep> <all|language> subcommand.
+     */
+    private void handleForceMessages(CommandSender sender, String[] args) {
+        ConfigManager cm = plugin.getConfigManager();
+        String currentLang = cm.getConfig().getString("language", "en");
+
+        if (args.length < 2) {
+            // No mode specified — show current language + usage
+            ColorUtils.send(sender, cm.getMessage("force-messages-current").replace("{0}", currentLang));
+            ColorUtils.send(sender, cm.getMessage("force-messages-usage"));
+            return;
+        }
+
+        String mode = args[1].toLowerCase(); // new or keep
+
+        if (!mode.equals("new") && !mode.equals("keep")) {
+            ColorUtils.send(sender, cm.getMessage("force-messages-invalid-mode"));
+            ColorUtils.send(sender, cm.getMessage("force-messages-usage"));
+            return;
+        }
+
+        if (args.length < 3) {
+            ColorUtils.send(sender, cm.getMessage("force-messages-usage"));
+            return;
+        }
+
+        String target = args[2].toLowerCase(); // all or specific language
+
+        if (target.equals("all")) {
+            // Apply to ALL languages on disk
+            java.util.List<String> langs = cm.getAvailableLanguages();
+            if (langs.isEmpty()) {
+                ColorUtils.send(sender, cm.getMessage("language-not-found").replace("{0}", "none"));
+                return;
+            }
+            int count = 0;
+            for (String lang : langs) {
+                boolean success;
+                if (mode.equals("new")) {
+                    success = cm.forceNewMessageFile(lang);
+                } else {
+                    success = cm.forceKeepMessageFile(lang);
+                }
+                if (success) count++;
+            }
+            // Reload messages since the active language may have changed
+            cm.reload();
+            if (mode.equals("new")) {
+                ColorUtils.send(sender, cm.getMessage("force-messages-reset-all").replace("{0}", String.valueOf(count)));
+            } else {
+                ColorUtils.send(sender, cm.getMessage("force-messages-all").replace("{0}", String.valueOf(count)));
+            }
+        } else {
+            // Apply to a specific language
+            String lang = target;
+            // Verify the language file exists (either on disk or in JAR)
+            java.util.List<String> available = cm.getAvailableLanguages();
+            boolean existsOnDisk = available.contains(lang);
+            boolean existsInJar = plugin.getResource("messages/" + lang + ".yml") != null;
+
+            if (!existsOnDisk && !existsInJar) {
+                ColorUtils.send(sender, cm.getMessage("language-not-found").replace("{0}", String.join(", ", available)));
+                return;
+            }
+
+            boolean success;
+            if (mode.equals("new")) {
+                success = cm.forceNewMessageFile(lang);
+            } else {
+                success = cm.forceKeepMessageFile(lang);
+            }
+
+            if (!success) {
+                ColorUtils.send(sender, cm.getMessage("language-not-found").replace("{0}", String.join(", ", available)));
+                return;
+            }
+
+            boolean isActiveLang = lang.equalsIgnoreCase(currentLang);
+
+            // Reload if the updated file is the active language
+            if (isActiveLang) {
+                cm.reload();
+            }
+
+            if (mode.equals("new")) {
+                if (isActiveLang) {
+                    ColorUtils.send(sender, cm.getMessage("force-messages-reset-success").replace("{0}", lang));
+                } else {
+                    ColorUtils.send(sender, cm.getMessage("force-messages-reset-no-active").replace("{0}", lang));
+                }
+            } else {
+                if (isActiveLang) {
+                    ColorUtils.send(sender, cm.getMessage("force-messages-success").replace("{0}", lang));
+                } else {
+                    ColorUtils.send(sender, cm.getMessage("force-messages-no-changes").replace("{0}", lang));
+                }
+            }
+        }
     }
 }

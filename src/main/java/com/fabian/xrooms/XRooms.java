@@ -12,7 +12,6 @@ import com.fabian.xrooms.utils.DebugLogger;
 import com.fabian.xrooms.utils.SchedulerUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -137,15 +136,11 @@ public class XRooms extends JavaPlugin {
         // Initialize bStats Metrics
         setupMetrics();
 
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&8[&bX-Rooms&8] &7----------------------------------------------"));
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&8[&bX-Rooms&8]   &aEnabled v" + getDescription().getVersion() + "! Enjoy rooms!"));
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&8[&bX-Rooms&8]   &fHolograms: &e" + hologramManager.getProviderName()
-                + " &7| &fLanguage: &e" + configManager.getConfig().getString("language", "en").toUpperCase()));
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&8[&bX-Rooms&8] &7----------------------------------------------"));
+        getLogger().info(" ----------------------------------------------");
+        getLogger().info("   Enabled v" + getDescription().getVersion() + "! Enjoy rooms!");
+        getLogger().info("   Holograms: " + hologramManager.getProviderName()
+                + " | Language: " + configManager.getConfig().getString("language", "en").toUpperCase());
+        getLogger().info(" ----------------------------------------------");
     }
 
     private Object schematicTask;
@@ -205,11 +200,8 @@ public class XRooms extends JavaPlugin {
             roomManager.saveAll();
         }
 
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&8[&bX-Rooms&8] &7----------------------------------------------"));
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&8[&bX-Rooms&8]   &cDisabled v" + getDescription().getVersion() + "! Out."));
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&8[&bX-Rooms&8] &7----------------------------------------------"));
+        getLogger().info(" ----------------------------------------------");
+        getLogger().info("   Disabled v" + getDescription().getVersion() + "! Out.");
+        getLogger().info(" ----------------------------------------------");
     }
 }

@@ -24,6 +24,7 @@ permissions:
       xrooms.admin.edit: true
       xrooms.admin.gui: true
       xrooms.admin.tp: true
+      xrooms.admin.forcemessages: true
   xrooms.admin.create:
     description: Allows creating new rooms
     default: op
@@ -41,6 +42,9 @@ permissions:
     default: op
   xrooms.admin.tp:
     description: "Allows teleporting to rooms"
+    default: op
+  xrooms.admin.forcemessages:
+    description: "Allows force-updating message files"
     default: op
   xrooms.player.*:
     description: Allows entering all rooms (for VIPs/Admins)
