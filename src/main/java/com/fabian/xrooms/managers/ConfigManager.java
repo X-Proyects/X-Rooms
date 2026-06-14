@@ -151,13 +151,21 @@ public class ConfigManager {
         // Try to load, fall back to en.yml if corrupt
         YamlConfiguration loaded = null;
         try {
-            loaded = YamlConfiguration.loadConfiguration(new InputStreamReader(new FileInputStream(messagesFile), StandardCharsets.UTF_8));
+            try {
+                loaded = YamlConfiguration.loadConfiguration(new InputStreamReader(new FileInputStream(messagesFile), StandardCharsets.UTF_8));
+            } catch (java.io.FileNotFoundException e) {
+                loaded = YamlConfiguration.loadConfiguration(messagesFile);
+            }
             if (loaded.getKeys(false).isEmpty()) {
                 throw new RuntimeException("Empty or corrupt messages file");
             }
         } catch (Exception e) {
             plugin.logWarning("Messages file messages/" + lang + ".yml is corrupt, falling back to en.yml");
-            loaded = YamlConfiguration.loadConfiguration(new InputStreamReader(new FileInputStream(new File(plugin.getDataFolder(), "messages/en.yml")), StandardCharsets.UTF_8));
+            try {
+                loaded = YamlConfiguration.loadConfiguration(new InputStreamReader(new FileInputStream(new File(plugin.getDataFolder(), "messages/en.yml")), StandardCharsets.UTF_8));
+            } catch (java.io.FileNotFoundException ex) {
+                loaded = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages/en.yml"));
+            }
         }
 
         this.messages = loaded;
