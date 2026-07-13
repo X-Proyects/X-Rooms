@@ -46,7 +46,6 @@ public class DependencyManager {
             plugin.getLogger().info("Loading runtime dependencies via X-API...");
             DebugLogger.debug("DependencyManager", "Loading runtime dependencies...");
             loadAdventureDependencies();
-            loadXSeriesDependency();
             plugin.getLogger().info("All dependencies loaded successfully!");
             DebugLogger.debug("DependencyManager", "All dependencies loaded successfully");
         } catch (Exception e) {
@@ -106,14 +105,5 @@ public class DependencyManager {
         libraryManager.loadLibrary(examinationApi);
         libraryManager.loadLibrary(examinationString);
     }
-
-    private void loadXSeriesDependency() {
-        Library xseries = Library.builder()
-                .groupId("com.github.cryptomorin")
-                .artifactId("XSeries")
-                .version("13.6.0")
-                .build();
-
-        libraryManager.loadLibrary(xseries);
-    }
 }
+

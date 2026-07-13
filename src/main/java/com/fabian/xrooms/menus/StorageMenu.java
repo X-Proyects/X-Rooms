@@ -1,8 +1,8 @@
 package com.fabian.xrooms.menus;
 
-import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.utils.DebugLogger;
+import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
@@ -66,7 +66,7 @@ public class StorageMenu extends Menu {
         DebugLogger.debug("StorageMenu", "Opening storage menu (type=" + type + ") for room " + room.getName());
         // Bottom decoration
         for (int i = 46; i < 53; i++) {
-            inventory.setItem(i, createItem(XMaterial.BLACK_STAINED_GLASS_PANE.parseMaterial(), " ", null));
+            inventory.setItem(i, createItem(Material.BLACK_STAINED_GLASS_PANE, " ", null));
         }
 
         List<ItemStack> items = type.equalsIgnoreCase("rewards") ? room.getRewards() : room.getEquipment();
@@ -76,11 +76,11 @@ public class StorageMenu extends Menu {
             }
         }
 
-        inventory.setItem(45, createItem(XMaterial.RED_WOOL.parseMaterial(), 
+        inventory.setItem(45, createItem(Material.RED_WOOL, 
                 plugin.getConfigManager().getMessageRaw("gui-button-cancel"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-button-cancel-lore"))));
                 
-        inventory.setItem(53, createItem(XMaterial.LIME_WOOL.parseMaterial(), 
+        inventory.setItem(53, createItem(Material.LIME_WOOL, 
                 plugin.getConfigManager().getMessageRaw("gui-button-save"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-button-save-lore"))));
     }
@@ -94,7 +94,7 @@ public class StorageMenu extends Menu {
         List<ItemStack> items = new ArrayList<>();
         for (int i = 0; i < 45; i++) {
             ItemStack item = inv.getItem(i);
-            if (item != null && item.getType() != org.bukkit.Material.AIR) {
+            if (item != null && item.getType() != Material.AIR) {
                 items.add(item);
             }
         }

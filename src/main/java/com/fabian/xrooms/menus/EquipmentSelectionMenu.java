@@ -1,8 +1,8 @@
 package com.fabian.xrooms.menus;
 
-import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.utils.DebugLogger;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -46,17 +46,17 @@ public class EquipmentSelectionMenu extends Menu {
     @Override
     public void setMenuItems() {
         DebugLogger.debug("EquipmentSelectionMenu", "Opening equipment selection for room " + room.getName());
-        fillBorders(XMaterial.BLACK_STAINED_GLASS_PANE.parseMaterial());
+        fillBorders(Material.BLACK_STAINED_GLASS_PANE);
 
-        inventory.setItem(11, createItem(XMaterial.BOOK.parseMaterial(), 
+        inventory.setItem(11, createItem(Material.BOOK, 
                 plugin.getConfigManager().getMessageRaw("gui-view-equipment"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-view-equipment-lore"))));
         
-        inventory.setItem(15, createItem(XMaterial.ANVIL.parseMaterial(), 
+        inventory.setItem(15, createItem(Material.ANVIL, 
                 plugin.getConfigManager().getMessageRaw("gui-edit-equipment"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-edit-equipment-lore"))));
 
-        inventory.setItem(22, createItem(XMaterial.ARROW.parseMaterial(), 
+        inventory.setItem(22, createItem(Material.ARROW, 
                 plugin.getConfigManager().getMessageRaw("gui-back"), null));
     }
 }

@@ -1,8 +1,8 @@
 package com.fabian.xrooms.menus;
 
-import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.utils.DebugLogger;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -112,7 +112,7 @@ public class AbilitiesMenu extends Menu {
     @Override
     public void setMenuItems() {
         DebugLogger.debug("AbilitiesMenu", "Opening abilities menu for room " + room.getName());
-        fillBorders(XMaterial.PURPLE_STAINED_GLASS_PANE.parseMaterial());
+        fillBorders(Material.PURPLE_STAINED_GLASS_PANE);
 
         for (int i = 0; i < ABILITIES.length; i++) {
             String key = ABILITIES[i][0].toLowerCase();
@@ -124,8 +124,11 @@ public class AbilitiesMenu extends Menu {
                     ? plugin.getConfigManager().getMessageRaw("gui-ability-status-on").replace("{level}", String.valueOf(level))
                     : plugin.getConfigManager().getMessageRaw("gui-ability-status-off");
 
+            Material mat = Material.matchMaterial(materialName);
+            if (mat == null) mat = Material.BARRIER;
+
             inventory.setItem(SLOTS[i], createItem(
-                    XMaterial.matchXMaterial(materialName).orElse(XMaterial.BARRIER).parseMaterial(),
+                    mat,
                     displayName,
                     Arrays.asList(
                             "",
@@ -138,7 +141,7 @@ public class AbilitiesMenu extends Menu {
             ));
         }
 
-        inventory.setItem(31, createItem(XMaterial.ARROW.parseMaterial(),
+        inventory.setItem(31, createItem(Material.ARROW,
                 plugin.getConfigManager().getMessageRaw("gui-back"), null));
     }
 }

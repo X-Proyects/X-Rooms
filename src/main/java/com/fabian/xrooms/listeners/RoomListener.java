@@ -1,12 +1,13 @@
 package com.fabian.xrooms.listeners;
 
-import com.cryptomorin.xseries.XSound;
-import com.cryptomorin.xseries.messages.Titles;
 import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.models.RoomState;
 import com.fabian.xrooms.utils.DebugLogger;
 import com.fabian.xrooms.utils.WorldEditUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -52,10 +53,10 @@ public class RoomListener implements Listener {
                         roomTimers.put(room, room.getPvpDuration());
                         
                         for (UUID id : room.getAlivePlayers()) {
-                            Player p = org.bukkit.Bukkit.getPlayer(id);
+                            Player p = Bukkit.getPlayer(id);
                             if (p != null) {
-                                Titles.sendTitle(p, 5, 20, 5, plugin.getConfigManager().getMessageRaw("title-fight"), "");
-                                XSound.ENTITY_ENDER_DRAGON_GROWL.play(p);
+                                p.sendTitle(plugin.getConfigManager().getMessageRaw("title-fight"), "", 5, 20, 5);
+                                p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
                                 
                                 if (!plugin.getConfigManager().isUseOwnInventory()) {
                                     plugin.getInventoryManager().saveAndClearInventory(p);
@@ -69,10 +70,10 @@ public class RoomListener implements Listener {
                     } else {
                         // Countdown
                         for (UUID id : room.getAlivePlayers()) {
-                            Player p = org.bukkit.Bukkit.getPlayer(id);
+                            Player p = Bukkit.getPlayer(id);
                             if (p != null) {
-                                Titles.sendTitle(p, 5, 20, 5, plugin.getConfigManager().getMessageRaw("title-countdown").replace("{time}", String.valueOf(left)), "");
-                                XSound.BLOCK_NOTE_BLOCK_PLING.play(p);
+                                p.sendTitle(plugin.getConfigManager().getMessageRaw("title-countdown").replace("{time}", String.valueOf(left)), "", 5, 20, 5);
+                                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
                             }
                         }
                         startTimers.put(room, left - 1);
@@ -84,9 +85,9 @@ public class RoomListener implements Listener {
                     } else {
                         String msg = plugin.getConfigManager().getMessage("actionbar-pvp-ends").replace("{time}", String.valueOf(left));
                         for (UUID id : room.getAlivePlayers()) {
-                            Player p = org.bukkit.Bukkit.getPlayer(id);
+                            Player p = Bukkit.getPlayer(id);
                             if (p != null) {
-                                com.cryptomorin.xseries.messages.ActionBar.sendActionBar(p, msg);
+                                sendActionBar(p, msg);
                             }
                         }
                         roomTimers.put(room, left - 1);
@@ -94,6 +95,40 @@ public class RoomListener implements Listener {
                 }
             }
         }, 20L, 20L);
+    }
+
+    private void sendActionBar(Player p, String msg) {
+        String colored = ChatColor.translateAlternateColorCodes('&', msg);
+        try {
+            // Try Paper API first (modern servers)
+            Class<?> componentClass = Class.forName("net.kyori.adventure.text.Component");
+            Object component = Class.forName("net.kyori.adventure.text.TextComponent")
+                    .getMethod("text", String.class).invoke(null, colored);
+            p.getClass().getMethod("sendActionBar", componentClass).invoke(p, component);
+        } catch (Exception e) {
+            try {
+                // Spigot 1.16.1+ : ChatMessageType.ACTION_BAR
+                Object chatMessageType = Class.forName("net.md_5.bungee.api.ChatMessageType")
+                        .getEnumConstants()[3]; // ACTION_BAR
+                Object textComponent = Class.forName("net.md_5.bungee.api.chat.TextComponent")
+                        .getConstructor(String.class).newInstance(colored);
+                p.getClass().getMethod("sendActionBar", chatMessageType.getClass(), 
+                        Class.forName("net.md_5.bungee.api.chat.BaseComponent[]"))
+                        .invoke(p, chatMessageType, new Object[]{textComponent});
+            } catch (Exception ignored) {
+                // 1.13-1.15.2: action bar not available, skip
+            }
+        }
+    }
+
+    private void playSound(Player p, String soundName) {
+        if (soundName == null || soundName.isEmpty()) return;
+        try {
+            Sound sound = Sound.valueOf(soundName);
+            p.playSound(p.getLocation(), sound, 1.0f, 1.0f);
+        } catch (IllegalArgumentException e) {
+            DebugLogger.debug("RoomListener", "Unknown sound: " + soundName);
+        }
     }
 
     @EventHandler
@@ -174,8 +209,8 @@ public class RoomListener implements Listener {
         if (showTitle) {
             String title = plugin.getConfigManager().color(room.getEntryTitle().replace("{name}", room.getDisplayName()));
             String subtitle = plugin.getConfigManager().color(room.getEntrySubtitle());
-            Titles.sendTitle(p, 10, 40, 10, title, subtitle);
-            XSound.matchXSound(room.getEntrySound()).ifPresent(s -> s.play(p));
+            p.sendTitle(title, subtitle, 10, 40, 10);
+            playSound(p, room.getEntrySound());
         }
         
         // Start check
@@ -243,7 +278,7 @@ public class RoomListener implements Listener {
         boolean isWinner = clone.size() == 1;
 
         for (UUID id : clone) {
-            Player p = org.bukkit.Bukkit.getPlayer(id);
+            Player p = Bukkit.getPlayer(id);
             if (p != null) {
                 p.sendMessage(plugin.getConfigManager().getMessage("pvp-ended"));
             }
@@ -260,7 +295,7 @@ public class RoomListener implements Listener {
             room.getAlivePlayers().clear();
             
             for (UUID id : clone) {
-                Player p = org.bukkit.Bukkit.getPlayer(id);
+                Player p = Bukkit.getPlayer(id);
                 if (p != null && currentRooms.get(p.getUniqueId()) == room) {
                     leaveRoomRegion(p, room);
                     if (!plugin.getConfigManager().isUseOwnInventory()) {
@@ -291,7 +326,7 @@ public class RoomListener implements Listener {
             startTimers.remove(room);
             List<UUID> clone = new java.util.ArrayList<>(room.getAlivePlayers());
             for (UUID id : clone) {
-                Player p = org.bukkit.Bukkit.getPlayer(id);
+                Player p = Bukkit.getPlayer(id);
                 if (p != null) {
                     p.sendMessage(plugin.getConfigManager().getMessage("pvp-cancelled"));
                 }
@@ -350,7 +385,7 @@ public class RoomListener implements Listener {
             
             Player killer = victim.getKiller();
             if (killer != null) {
-                XSound.matchXSound(room.getKillSound()).ifPresent(s -> s.play(killer));
+                playSound(killer, room.getKillSound());
             }
             
             room.getAlivePlayers().remove(victim.getUniqueId());

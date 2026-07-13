@@ -1,8 +1,8 @@
 package com.fabian.xrooms.menus;
 
-import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.utils.DebugLogger;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -34,7 +34,7 @@ public class RoomsMenu extends Menu {
             return;
         }
 
-        if (e.getCurrentItem().getType() == XMaterial.CHEST.parseMaterial()) {
+        if (e.getCurrentItem().getType() == Material.CHEST) {
             Room room = roomSlots.get(e.getSlot());
             if (room != null) {
                 new RoomEditMenu(room).open(p);
@@ -45,7 +45,7 @@ public class RoomsMenu extends Menu {
     @Override
     public void setMenuItems() {
         DebugLogger.debug("RoomsMenu", "Opening rooms menu with " + plugin.getRoomManager().getAllRooms().size() + " room(s)");
-        fillBorders(XMaterial.GRAY_STAINED_GLASS_PANE.parseMaterial());
+        fillBorders(Material.GRAY_STAINED_GLASS_PANE);
 
         Collection<Room> rooms = plugin.getRoomManager().getAllRooms();
         int slot = 10;
@@ -53,7 +53,7 @@ public class RoomsMenu extends Menu {
             if (slot == 17 || slot == 26 || slot == 35 || slot == 44) slot += 2;
             if (slot > 43) break;
 
-            inventory.setItem(slot, createItem(XMaterial.CHEST.parseMaterial(), 
+            inventory.setItem(slot, createItem(Material.CHEST, 
                     "&b" + room.getDisplayName(), 
                     Arrays.asList(
                         plugin.getConfigManager().getMessageRaw("gui-room-id").replace("{id}", room.getName()),
@@ -64,7 +64,7 @@ public class RoomsMenu extends Menu {
             slot++;
         }
 
-        inventory.setItem(49, createItem(XMaterial.BARRIER.parseMaterial(), 
+        inventory.setItem(49, createItem(Material.BARRIER, 
                 plugin.getConfigManager().getMessageRaw("gui-close"), null));
     }
 }

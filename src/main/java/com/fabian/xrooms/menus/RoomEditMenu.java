@@ -1,8 +1,8 @@
 package com.fabian.xrooms.menus;
 
-import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.utils.DebugLogger;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -96,21 +96,8 @@ public class RoomEditMenu extends Menu {
                 p.sendMessage(plugin.getConfigManager().getMessage("room-edited").replace("{room}", room.getName()));
                 new RoomEditMenu(room).open(p); // Refresh
                 break;
-            case 34: // Entry Title
-                plugin.getChatInputManager().requestInput(p, plugin.getConfigManager().getMessageRaw("chat-entry-title-prompt"), input -> {
-                    room.setEntryTitle(input);
-                    plugin.getRoomManager().saveRoom(room);
-                    p.sendMessage(plugin.getConfigManager().getMessage("room-edited").replace("{room}", room.getName()));
-                    this.open(p);
-                }, () -> this.open(p));
-                break;
-            case 36: // Entry Subtitle
-                plugin.getChatInputManager().requestInput(p, plugin.getConfigManager().getMessageRaw("chat-entry-subtitle-prompt"), input -> {
-                    room.setEntrySubtitle(input);
-                    plugin.getRoomManager().saveRoom(room);
-                    p.sendMessage(plugin.getConfigManager().getMessage("room-edited").replace("{room}", room.getName()));
-                    this.open(p);
-                }, () -> this.open(p));
+            case 34: // Entry Title & Subtitle Menu
+                new EntryTitleMenu(room).open(p);
                 break;
             case 40: // Back
                 new RoomsMenu().open(p);
@@ -120,44 +107,44 @@ public class RoomEditMenu extends Menu {
 
     @Override
     public void setMenuItems() {
-        fillBorders(XMaterial.CYAN_STAINED_GLASS_PANE.parseMaterial());
+        fillBorders(Material.CYAN_STAINED_GLASS_PANE);
 
-        inventory.setItem(10, createItem(XMaterial.NAME_TAG.parseMaterial(), 
+        inventory.setItem(10, createItem(Material.NAME_TAG, 
                 plugin.getConfigManager().getMessageRaw("gui-rename"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-current-value").replace("{value}", room.getDisplayName()))));
         
-        inventory.setItem(12, createItem(XMaterial.PAPER.parseMaterial(), 
+        inventory.setItem(12, createItem(Material.PAPER, 
                 plugin.getConfigManager().getMessageRaw("gui-permission"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-perm-info").replace("{perm}", "xrooms.player." + room.getName().toLowerCase()))));
         
-        inventory.setItem(14, createItem(XMaterial.GOLD_INGOT.parseMaterial(), 
+        inventory.setItem(14, createItem(Material.GOLD_INGOT, 
                 plugin.getConfigManager().getMessageRaw("gui-rewards"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-click-to-edit"))));
         
-        inventory.setItem(16, createItem(XMaterial.DIAMOND_SWORD.parseMaterial(), 
+        inventory.setItem(16, createItem(Material.DIAMOND_SWORD, 
                 plugin.getConfigManager().getMessageRaw("gui-equipment"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-click-to-edit"))));
         
-        inventory.setItem(20, createItem(XMaterial.NOTE_BLOCK.parseMaterial(), 
+        inventory.setItem(20, createItem(Material.NOTE_BLOCK, 
                 plugin.getConfigManager().getMessageRaw("gui-sounds-entry"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-current-value").replace("{value}", room.getEntrySound()))));
         
-        inventory.setItem(22, createItem(XMaterial.SKELETON_SKULL.parseMaterial(), 
+        inventory.setItem(22, createItem(Material.SKELETON_SKULL, 
                 plugin.getConfigManager().getMessageRaw("gui-sounds-kill"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-current-value").replace("{value}", room.getKillSound()))));
         
-        inventory.setItem(24, createItem(XMaterial.COMPASS.parseMaterial(), 
+        inventory.setItem(24, createItem(Material.COMPASS, 
                 plugin.getConfigManager().getMessageRaw("gui-update-region"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-click-to-edit"))));
 
-        inventory.setItem(28, createItem(XMaterial.CLOCK.parseMaterial(), 
+        inventory.setItem(28, createItem(Material.CLOCK, 
                 plugin.getConfigManager().getMessageRaw("gui-pvp-duration"), 
                 Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-current-value").replace("{value}", 
                         room.getPvpDuration() == -1 ? "∞" : room.getPvpDuration() + "s"))));
 
         // Abilities summary
         int activeCount = (int) room.getAbilities().values().stream().filter(v -> v > 0).count();
-        inventory.setItem(30, createItem(XMaterial.BREWING_STAND.parseMaterial(), 
+        inventory.setItem(30, createItem(Material.BREWING_STAND, 
                 plugin.getConfigManager().getMessageRaw("gui-abilities"), 
                 Arrays.asList(
                     plugin.getConfigManager().getMessageRaw("gui-abilities-active").replace("{count}", String.valueOf(activeCount)),
@@ -165,7 +152,7 @@ public class RoomEditMenu extends Menu {
                     plugin.getConfigManager().getMessageRaw("gui-click-to-edit")
                 )));
 
-        inventory.setItem(32, createItem(XMaterial.IRON_DOOR.parseMaterial(), 
+        inventory.setItem(32, createItem(Material.IRON_DOOR, 
                 plugin.getConfigManager().getMessageRaw("gui-winner-location"), 
                 Arrays.asList(
                     plugin.getConfigManager().getMessageRaw("gui-winner-location-lore"),
@@ -175,15 +162,11 @@ public class RoomEditMenu extends Menu {
                         plugin.getConfigManager().getMessageRaw("gui-winner-not-set")
                 )));
         
-        inventory.setItem(34, createItem(XMaterial.OAK_SIGN.parseMaterial(), 
-                plugin.getConfigManager().getMessageRaw("gui-entry-title"), 
-                Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-current-value").replace("{value}", room.getEntryTitle()))));
-        
-        inventory.setItem(36, createItem(XMaterial.OAK_SIGN.parseMaterial(), 
-                plugin.getConfigManager().getMessageRaw("gui-entry-subtitle"), 
-                Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-current-value").replace("{value}", room.getEntrySubtitle()))));
+        inventory.setItem(34, createItem(Material.OAK_SIGN, 
+                plugin.getConfigManager().getMessageRaw("gui-entry-titles-editor"), 
+                Arrays.asList(plugin.getConfigManager().getMessageRaw("gui-click-to-edit"))));
 
-        inventory.setItem(40, createItem(XMaterial.ARROW.parseMaterial(), 
+        inventory.setItem(40, createItem(Material.ARROW, 
                 plugin.getConfigManager().getMessageRaw("gui-back"), null));
     }
 }

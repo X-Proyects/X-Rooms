@@ -1,8 +1,8 @@
 package com.fabian.xrooms.menus;
 
-import com.cryptomorin.xseries.XMaterial;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.utils.DebugLogger;
+import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -44,7 +44,7 @@ public class EquipmentViewMenu extends Menu {
         DebugLogger.debug("EquipmentViewMenu", "Opening equipment view for room " + room.getName());
         // Decoration: Black glass at the bottom only as requested
         for (int i = 45; i < 54; i++) {
-            inventory.setItem(i, createItem(XMaterial.BLACK_STAINED_GLASS_PANE.parseMaterial(), " ", null));
+            inventory.setItem(i, createItem(Material.BLACK_STAINED_GLASS_PANE, " ", null));
         }
 
         List<ItemStack> equipment = room.getEquipment();
@@ -54,7 +54,7 @@ public class EquipmentViewMenu extends Menu {
             }
         }
 
-        inventory.setItem(49, createItem(XMaterial.BARRIER.parseMaterial(), 
+        inventory.setItem(49, createItem(Material.BARRIER, 
                 plugin.getConfigManager().getMessageRaw("gui-close"), null));
     }
 }
