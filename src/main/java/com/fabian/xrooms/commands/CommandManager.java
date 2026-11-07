@@ -6,6 +6,7 @@ import com.fabian.xrooms.menus.RoomsMenu;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.utils.ColorUtils;
 import com.fabian.xrooms.utils.DebugLogger;
+import com.fabian.xrooms.utils.SchedulerUtil;
 import com.fabian.xrooms.utils.WorldEditUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -193,13 +194,14 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         if (sub.equals("debug")) {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
-                if (plugin.getConfigManager().debugPlayer != null && plugin.getConfigManager().debugPlayer.equals(player.getUniqueId())) {
-                    plugin.getConfigManager().debugPlayer = null;
+                java.util.UUID debugPlayer = DebugLogger.getDebugPlayer();
+                if (debugPlayer != null && debugPlayer.equals(player.getUniqueId())) {
+                    DebugLogger.setDebugPlayer(null);
                     com.fabian.xrooms.utils.ColorUtils.sendComponent(player,
                             com.fabian.xrooms.utils.ColorUtils.format(player,
                             plugin.getConfigManager().getPrefix() + "&7Debug mode: &cdisabled"));
                 } else {
-                    plugin.getConfigManager().debugPlayer = player.getUniqueId();
+                    DebugLogger.setDebugPlayer(player.getUniqueId());
                     com.fabian.xrooms.utils.ColorUtils.sendComponent(player,
                             com.fabian.xrooms.utils.ColorUtils.format(player,
                             plugin.getConfigManager().getPrefix() + "&7Debug mode: &aenabled &7(messages sent to you)"));
@@ -208,6 +210,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
                 boolean dbg = plugin.getConfigManager().getConfig().getBoolean("debug", false);
                 plugin.getConfig().set("debug", !dbg);
                 plugin.saveConfig();
+                DebugLogger.setDebug(!dbg); // re-sync the unified debug flag immediately
                 ColorUtils.send(sender, com.fabian.xrooms.utils.ColorUtils.translateColors(
                         plugin.getConfigManager().getPrefix() + "&7Debug mode: " + (!dbg ? "&aenabled &7(console)" : "&cdisabled")));
             }
@@ -258,6 +261,18 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             }
 
             String name = args[1];
+            // Path-traversal / name validation: reject names containing /, \, ..
+            // or any character outside [a-zA-Z0-9_-]. This prevents an admin (or a
+            // misconfigured permissions setup) from creating a room named e.g.
+            // "../../config" which would write or delete files outside the
+            // rooms folder.
+            if (!plugin.getRoomManager().isValidRoomName(name)) {
+                ColorUtils.send(sender, ColorUtils.translateColors(
+                        plugin.getConfigManager().getPrefix()
+                                + "&cInvalid room name. Use only letters, numbers, "
+                                + "underscores, and hyphens (1-32 chars)."));
+                return true;
+            }
             if (plugin.getRoomManager().getRoom(name) != null) {
                 player.sendMessage(plugin.getConfigManager().getMessage("room-already-exists").replace("{name}", name));
                 return true;
@@ -288,6 +303,16 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             }
 
             String name = args[1];
+            // Path-traversal / name validation (same as the create flow). Defends
+            // against /xrooms delete ../../config etc. doing arbitrary file
+            // deletion outside the rooms folder.
+            if (!plugin.getRoomManager().isValidRoomName(name)) {
+                ColorUtils.send(sender, ColorUtils.translateColors(
+                        plugin.getConfigManager().getPrefix()
+                                + "&cInvalid room name. Use only letters, numbers, "
+                                + "underscores, and hyphens (1-32 chars)."));
+                return true;
+            }
             if (plugin.getRoomManager().getRoom(name) == null) {
                 player.sendMessage(plugin.getConfigManager().getMessage("room-not-found"));
                 return true;
@@ -353,7 +378,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             double cy = room.getMinY() + 1.0;
             double cz = (room.getMinZ() + room.getMaxZ()) / 2.0;
             Location loc = new Location(org.bukkit.Bukkit.getWorld(room.getWorldName()), cx, cy, cz);
-            plugin.getXScheduler().teleport(player, loc);
+            SchedulerUtil.teleport(player, loc);
             player.sendMessage(plugin.getConfigManager().getMessage("teleported").replace("{name}", room.getDisplayName()));
             return true;
         }

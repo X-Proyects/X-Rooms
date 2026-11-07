@@ -4,6 +4,7 @@ import com.fabian.xrooms.XRooms;
 import com.fabian.xrooms.models.Room;
 import com.fabian.xrooms.models.RoomState;
 import com.fabian.xrooms.utils.DebugLogger;
+import com.fabian.xrooms.utils.SchedulerUtil;
 import com.fabian.xrooms.utils.WorldEditUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -41,7 +42,7 @@ public class RoomListener implements Listener {
     }
 
     private void startGlobalTask() {
-        plugin.getXScheduler().runTimer(() -> {
+        SchedulerUtil.runTaskTimer(plugin, () -> {
             for (Room room : plugin.getRoomManager().getAllRooms()) {
                 if (room.getState() == RoomState.STARTING) {
                     int left = startTimers.getOrDefault(room, plugin.getConfigManager().getStartCountdown());
@@ -286,7 +287,7 @@ public class RoomListener implements Listener {
 
         long delayTicks = plugin.getConfigManager().getEndDelay() * 20L;
         
-        plugin.getXScheduler().runTaskLater(() -> {
+        SchedulerUtil.runTaskLater(plugin, () -> {
             if (room.isSchematicEnabled()) {
                 WorldEditUtils.pasteSchematic(plugin, room);
             }
@@ -306,10 +307,10 @@ public class RoomListener implements Listener {
                     // If there are more (tie/timeout), they go to spawn.
                     if (isWinner) {
                         if (room.getWinnerLocation() != null) {
-                            plugin.getXScheduler().teleport(p, room.getWinnerLocation());
+                            SchedulerUtil.teleport(p, room.getWinnerLocation());
                         }
                     } else {
-                        plugin.getXScheduler().teleport(p, p.getWorld().getSpawnLocation());
+                        SchedulerUtil.teleport(p, p.getWorld().getSpawnLocation());
                     }
                 }
             }

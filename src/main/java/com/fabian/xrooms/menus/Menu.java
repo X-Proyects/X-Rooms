@@ -58,9 +58,16 @@ public abstract class Menu implements InventoryHolder {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(plugin.getConfigManager().color(name));
-        if (lore != null) {
-            lore.replaceAll(s -> plugin.getConfigManager().color(s));
-            meta.setLore(lore);
+        if (lore != null && !lore.isEmpty()) {
+            // L5: `lore.replaceAll(...)` mutates the caller-supplied list in place.
+            // Many callers pass `Arrays.asList(...)` (immutable) which throws
+            // UnsupportedOperationException. Build a fresh mutable list, color each
+            // line into it, and use that as the item lore.
+            List<String> colored = new java.util.ArrayList<>(lore.size());
+            for (String s : lore) {
+                colored.add(plugin.getConfigManager().color(s));
+            }
+            meta.setLore(colored);
         }
         item.setItemMeta(meta);
         return item;

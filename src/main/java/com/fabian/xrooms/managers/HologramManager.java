@@ -71,7 +71,7 @@ public class HologramManager {
         }
     }
 
-    private void removeHologram(String name) {
+    public void removeHologram(String name) {
         String id = "xrooms_" + name;
         if (dhEnabled) {
             try {
@@ -87,6 +87,7 @@ public class HologramManager {
                 }
             } catch (NoClassDefFoundError | Exception ignored) {}
         }
+        DebugLogger.debug("HologramManager", "Removed hologram for room: " + name);
     }
 
     private void updateDecentHologram(String name, Location loc, List<String> lines) {

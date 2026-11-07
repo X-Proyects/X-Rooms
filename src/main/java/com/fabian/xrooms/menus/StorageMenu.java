@@ -97,19 +97,45 @@ public class StorageMenu extends Menu {
             if (item != null && item.getType() != Material.AIR) {
                 items.add(item);
             }
+            // Clear the editable slot so that the subsequent InventoryCloseEvent ->
+            // handleClose() handler does not re-duplicate these items back into
+            // the player's inventory (they have just been persisted to the room).
+            inv.setItem(i, null);
         }
-        
+
         if (type.equalsIgnoreCase("rewards")) {
             room.setRewards(items);
         } else {
             room.setEquipment(items);
         }
-        
+
         plugin.getRoomManager().saveRoom(room);
     }
 
     @Override
     public void handleClose(InventoryCloseEvent e) {
-        // We handle saving via the SAVE button now to avoid accidental saves
+        // C8: When the player closes the menu WITHOUT clicking SAVE, the items they
+        // placed into the editable slots (0..44) would otherwise be silently lost
+        // (the orphan Inventory is GC'd along with its contents). Return every
+        // non-AIR item to the player's inventory; drop overflow at the player's
+        // location so nothing is destroyed. The SAVE button still calls `save(...)`
+        // explicitly before close, which clears those slots — so this is a no-op
+        // when the player saves, and a safety net when they cancel/ESC.
+        if (!(e.getPlayer() instanceof org.bukkit.entity.Player)) {
+            return;
+        }
+        org.bukkit.entity.Player p = (org.bukkit.entity.Player) e.getPlayer();
+        org.bukkit.inventory.Inventory inv = e.getInventory();
+        for (int i = 0; i < 45; i++) {
+            org.bukkit.inventory.ItemStack item = inv.getItem(i);
+            if (item == null) continue;
+            if (item.getType() == org.bukkit.Material.AIR) continue;
+            java.util.HashMap<Integer, org.bukkit.inventory.ItemStack> overflow = p.getInventory().addItem(item);
+            for (org.bukkit.inventory.ItemStack leftover : overflow.values()) {
+                if (leftover == null || leftover.getType() == org.bukkit.Material.AIR) continue;
+                p.getWorld().dropItemNaturally(p.getLocation(), leftover);
+            }
+            inv.setItem(i, null);
+        }
     }
 }

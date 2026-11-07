@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Getter
 public class ConfigManager {
@@ -37,7 +36,6 @@ public class ConfigManager {
     
     private final Map<String, Integer> abilitiesLimits = new HashMap<>();
     private final Map<String, String> messageCache = new HashMap<>();
-    public UUID debugPlayer; // player who enabled debug via command (null = console-only via config)
 
     public ConfigManager(XRooms plugin) {
         this.plugin = plugin;
@@ -246,6 +244,8 @@ public class ConfigManager {
         this.config = plugin.getConfig();
         setupConfig();
         setupMessages();
+        // Re-sync the unified debug flag (canonical DebugLogger) after a config reload
+        DebugLogger.setDebug(config.getBoolean("debug", false));
         DebugLogger.debug("ConfigManager", "Configuration reloaded");
     }
 

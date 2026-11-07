@@ -16,10 +16,33 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
 public class RoomManager {
 
+    private final XRooms plugin;
     private final File roomsFolder;
     private final Map<String, Room> rooms = new HashMap<>();
 
+    /**
+     * Validate a user-supplied room name. Rejects path-traversal sequences
+     * ({@code /}, {@code \}, {@code ..}, leading dots) by whitelisting only
+     * ASCII letters, digits, underscores and hyphens, length 1..32.
+     * Used by the {@code create} / {@code delete} / {@code redefine} command
+     * flows (and any future programmatic caller) to prevent
+     * {@code ../../config}-style room names from writing outside the rooms
+     * folder.
+     */
+    public static boolean isValidRoomName(String name) {
+        if (name == null || name.isEmpty()) return false;
+        // Defense-in-depth: explicit rejection of path separators and dot
+        // segments before the regex (which already excludes them, but makes
+        // the intent explicit).
+        if (name.contains("/") || name.contains("\\")
+                || name.contains("..") || name.startsWith(".")) {
+            return false;
+        }
+        return name.matches("^[a-zA-Z0-9_\\-]{1,32}$");
+    }
+
     public RoomManager(XRooms plugin) {
+        this.plugin = plugin;
         this.roomsFolder = new File(plugin.getDataFolder(), "rooms");
         if (!roomsFolder.exists()) {
             roomsFolder.mkdirs();
@@ -36,6 +59,12 @@ public class RoomManager {
 
     public void deleteRoom(String name) {
         DebugLogger.debug("RoomManager", "Deleting room: " + name);
+        // Remove the hologram (both DecentHolograms and HolographicDisplays) for this
+        // room BEFORE removing the in-memory Room entry, otherwise the hologram would
+        // be orphaned in the world (and re-persisted by DH/HD on next restart).
+        if (plugin.getHologramManager() != null) {
+            plugin.getHologramManager().removeHologram(name);
+        }
         rooms.remove(name.toLowerCase());
         File file = new File(roomsFolder, name.toLowerCase() + ".yml");
         if (file.exists()) file.delete();

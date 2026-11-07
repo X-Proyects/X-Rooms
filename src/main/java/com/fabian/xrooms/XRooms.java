@@ -32,16 +32,19 @@ public class XRooms extends JavaPlugin {
     private HologramManager hologramManager;
     private ChatInputManager chatInputManager;
     private InventoryManager inventoryManager;
-    private SchedulerUtil xScheduler;
     private com.fabian.xrooms.utils.UpdateChecker updateChecker;
 
     @Override
     public void onEnable() {
         instance = this;
 
+        // Initialize the unified debug system (canonical DebugLogger) before anything logs
+        DebugLogger.init(this, "X-Rooms");
+
         try {
             // Initialize config managers first
             this.configManager = new ConfigManager(this);
+            DebugLogger.setDebug(this.configManager.getConfig().getBoolean("debug", false));
             DebugLogger.debug("Config", "ConfigManager initialized");
         } catch (Exception e) {
             DebugLogger.debug("Config", "Failed to initialize config managers", e);
@@ -56,9 +59,8 @@ public class XRooms extends JavaPlugin {
 
         // Initialize remaining managers
         try {
-            this.xScheduler = new SchedulerUtil(this);
             this.chatInputManager = new ChatInputManager(this);
-            DebugLogger.debug("Init", "SchedulerUtil and ChatInputManager initialized");
+            DebugLogger.debug("Init", "ChatInputManager initialized");
 
             this.permissionManager = new PermissionManager(this);
             DebugLogger.debug("Init", "PermissionManager initialized");
@@ -91,8 +93,8 @@ public class XRooms extends JavaPlugin {
                 DebugLogger.debug("PAPI", "PlaceholderAPI not found, skipping expansion");
             }
 
-            // Hologram Task
-            this.xScheduler.runTimer(() -> hologramManager.updateHolograms(), 20L, 100L);
+            // Hologram Task (static unified scheduler)
+            SchedulerUtil.runTaskTimer(this, () -> hologramManager.updateHolograms(), 20L, 100L);
             DebugLogger.debug("Init", "Hologram update task scheduled");
 
             // Schematic Task
@@ -109,8 +111,20 @@ public class XRooms extends JavaPlugin {
         // Check for updates
         if (configManager.getConfig().getBoolean("updates.check", true)) {
             DebugLogger.debug("Update", "Update checker enabled, scheduling check");
-            this.updateChecker = new com.fabian.xrooms.utils.UpdateChecker(this);
-            xScheduler.runAsync(() -> updateChecker.checkForUpdates());
+            final ConfigManager cm = configManager;
+            // X-Rooms has no LanguageManager — resolve update messages directly from
+            // the messages file, returning null for missing keys so the canonical
+            // English fallback kicks in. Localized files use {current}/{latest}/{link}
+            // placeholders which are mapped to the canonical %current%/%latest%/%url%.
+            this.updateChecker = new com.fabian.xrooms.utils.UpdateChecker(this, 134537, key -> {
+                String raw = cm.getMessages().getString(key);
+                if (raw == null || raw.isEmpty()) return null;
+                return cm.getPrefix() + raw
+                        .replace("{current}", "%current%")
+                        .replace("{latest}", "%latest%")
+                        .replace("{link}", "%url%");
+            });
+            SchedulerUtil.runAsync(this, () -> updateChecker.checkForUpdates());
         }
 
         // Register update notification listener
@@ -152,9 +166,7 @@ public class XRooms extends JavaPlugin {
 
     public void startSchematicTask() {
         if (schematicTask != null) {
-            try {
-                schematicTask.getClass().getMethod("cancel").invoke(schematicTask);
-            } catch (Exception ignored) {}
+            SchedulerUtil.cancelTask(schematicTask);
             schematicTask = null;
         }
 
@@ -162,7 +174,12 @@ public class XRooms extends JavaPlugin {
         if (interval > 0) {
             long ticks = interval * 60 * 20L;
             DebugLogger.debug("SchematicTask", "Scheduled auto-reset task: interval=" + interval + "min, ticks=" + ticks);
-            this.xScheduler.runTimer(() -> {
+            // The static unified scheduler returns the task handle synchronously
+            // (BukkitTask on Spigot/Paper, TaskWrapper on Folia), so it can be captured
+            // directly in `schematicTask` for cancellation — without the handle the
+            // cancellation block above would never find the task, leading to N
+            // duplicate paste tasks after N `/xrooms reload` invocations.
+            this.schematicTask = SchedulerUtil.runTaskTimer(this, () -> {
                 for (com.fabian.xrooms.models.Room room : roomManager.getAllRooms()) {
                     if (room.isSchematicEnabled() && room.getState() == com.fabian.xrooms.models.RoomState.WAITING) {
                         com.fabian.xrooms.utils.WorldEditUtils.pasteSchematic(this, room);
@@ -203,6 +220,11 @@ public class XRooms extends JavaPlugin {
         DebugLogger.debug("Init", "Plugin disabling...");
         if (roomManager != null) {
             roomManager.saveAll();
+        }
+        // Clean up all tracked HolographicDisplays holograms so they don't persist as
+        // orphaned ArmorStand entities in the world (and across restarts via HD's disk cache).
+        if (hologramManager != null) {
+            hologramManager.cleanup();
         }
 
         Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',

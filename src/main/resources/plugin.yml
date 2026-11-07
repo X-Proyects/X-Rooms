@@ -1,5 +1,5 @@
 name: X-Rooms
-version: 1.4
+version: 1.5
 main: com.fabian.xrooms.XRooms
 api-version: 1.13
 folia-supported: true
@@ -25,6 +25,7 @@ permissions:
       xrooms.admin.gui: true
       xrooms.admin.tp: true
       xrooms.admin.forcemessages: true
+      xrooms.admin.reload: true
   xrooms.admin.create:
     description: Allows creating new rooms
     default: op
